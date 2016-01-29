@@ -7,7 +7,6 @@
 import sys
 import time
 import random
-import logging
 import pymssql
 from settings import sqlserver_settings as s
 from settings import logger

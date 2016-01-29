@@ -9,14 +9,22 @@ from settings import download_settings as ds
 
 class Downloader(object):
 	"""A controller to download multiple files"""
-	def __init__(self, crawler_num, links):
+	def __init__(self, crawler_num):
 		super(Downloader, self).__init__()
+		self.crawler_num = crawler_num
+		self.src_queue = Queue.Queue(ds['queue_buffer'])
+		self.src_queue.join()
 		
-	def queueing(self):
-		pass
+	def queueing(self, links):
+		for link in links:
+			self.src_queue.put((*link))
 
 	def dispatch(self):
-		pass
+		if Crawler.count < self.crawler_num:
+			for i in range(Crawler.count, self.crawler_num):
+				c = Crawler(self.src_queue)
+				c = setDaemon(True)
+				c.start()
 
 
 
@@ -24,7 +32,7 @@ class Crawler(threading.Thread):
 	"""crawlers to download files in multiple threads"""
 	count = 0
 
-	def __init__(self, src_queue, crawler_name):
+	def __init__(self, src_queue):
 		super(Crawler, self).__init__()
 		self.src_queue = src_queue
 		Crawler.count += 1
