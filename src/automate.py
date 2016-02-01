@@ -2,6 +2,8 @@ import os
 import sys
 import importlib
 
+from base.sql_download import SQLDownloader
+
 try:
 	import settings
 except ImportError, e:
@@ -21,5 +23,10 @@ def execute_newest():
 			app = importlib.import_module(mod)
 			app.main()
 
+def temp():
+	s = SQLDownloader('../data/xianhua.txt')
+	s.download()
+
+
 if __name__ == '__main__':
-	execute_newest()
+	temp()

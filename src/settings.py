@@ -41,8 +41,9 @@ logging.config.fileConfig('conf/logging.conf')
 logger = logging.getLogger('root')
 
 download_settings = {
-	"queue_buffer": 500,
-	"timeout": 60,
+	"queue_buffer": 2500,
+	"queue_timeout": 60,
+	"download_timeout": 60,
 }
 
 from settings_local import *

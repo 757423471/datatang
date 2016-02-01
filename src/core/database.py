@@ -30,6 +30,7 @@ class SQLServerHandler(object):
 			try:
 				conn = pymssql.connect(host=s.get('host'), port=s.get('port'), user=s.get('user'),\
 					password=s.get('password'), database=s.get('database'), charset=s.get('charset'))
+				logger.info("connected")
 				return conn
 			except Exception, e:	# add a specified exception
 				conn_cnt += 1

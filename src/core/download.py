@@ -18,7 +18,8 @@ class Downloader(object):
 	def queueing(self, links):
 		try:
 			for link in links:
-				self.src_queue.put((*link), block=True, timeout=ds['queue_timeout'])
+				self.src_queue.put(link, block=True, timeout=ds['queue_timeout'])
+			self.src_queue.join()
 		except Queue.Full, e:
 			logger.info("download queue was blocked")
 			return
@@ -27,8 +28,9 @@ class Downloader(object):
 		if Crawler.count < self.crawler_num:
 			for i in range(Crawler.count, self.crawler_num):
 				c = Crawler(self.src_queue)
-				c = setDaemon(True)
+				c.setDaemon(True)
 				c.start()
+
 
 
 class Crawler(threading.Thread):
@@ -39,7 +41,7 @@ class Crawler(threading.Thread):
 		super(Crawler, self).__init__()
 		self.src_queue = src_queue
 		Crawler.count += 1
-		self.name = "crawler" + Crawler.count
+		self.name = "crawler" + str(Crawler.count)
 		logger.info('crawler %s is initialized' % self.name)
 
 	def __del__(self):
@@ -48,10 +50,10 @@ class Crawler(threading.Thread):
 
 	def run(self):
 		while True:
-			(url, filename) = self.src_queue.get()
+			(filename, url) = self.src_queue.get()
 
 			try:
-				response = urllib2.urlopen(url, timeout=ds['timeout'])
+				response = urllib2.urlopen(url, timeout=ds['download_timeout'])
 				with open(filename, 'wb') as fp:
 					fp.write(response.read())
 				self.src_queue.task_done()
