@@ -16,8 +16,12 @@ class Downloader(object):
 		self.src_queue.join()
 		
 	def queueing(self, links):
-		for link in links:
-			self.src_queue.put((*link))
+		try:
+			for link in links:
+				self.src_queue.put((*link), block=True, timeout=ds['queue_timeout'])
+		except Queue.Full, e:
+			logger.info("download queue was blocked")
+			return
 
 	def dispatch(self):
 		if Crawler.count < self.crawler_num:
@@ -25,7 +29,6 @@ class Downloader(object):
 				c = Crawler(self.src_queue)
 				c = setDaemon(True)
 				c.start()
-
 
 
 class Crawler(threading.Thread):
