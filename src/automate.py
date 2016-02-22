@@ -24,7 +24,7 @@ def execute_newest():
 			app.main()
 
 def temp():
-	s = SQLDownloader('../data/xianhua.txt')
+	s = SQLDownloader('../data/xianhua.txt', '../data/xianhua')
 	s.download()
 
 

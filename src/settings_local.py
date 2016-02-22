@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # this flie is used to define customized settings
-
+import os
 
 task_list = ["1545", "1546", "1547", "1548", "1549", "1591", "1592", "1593", "1624"]
 queue_list = []

@@ -3,10 +3,19 @@
 # defined by developers, basically settings are for the system
 # rarely needed to be modified
 
+import os
 import logging
 import logging.config
 
-azure_settings = {
+# PROJECT_ROOT = os.path.dirname(__file__)
+PROJECT_ROOT = os.getcwd()
+TOOLS_DIR = '%(PROJECT_ROOT)s/../tools' % locals()
+DATA_DIR = '%(PROJECT_ROOT)s/../data' % locals()
+LOGGING_CONF_FILE = '%(PROJECT_ROOT)s/conf/logging.conf' % locals() 
+
+DAFAULT_TIMEOUT = 60
+
+AZURE_SETTINGS = {
 	"account": "crowdfile", #容器名
 	"key": "LPKAQIkvntlpsZm+EBTB2JfjILpObuRfYzwhmBk31/ILoafSLzwkJaBQDhwcW4rpXks7UGi3+e2+1eCHHCn+SQ==", #容器对应的key值
 	"blob_host_base": ".blob.core.chinacloudapi.cn", #blob服务器
@@ -14,19 +23,19 @@ azure_settings = {
 	"queue_name": "auto-cut-queue-%s",
 }
 
-mongo_settings = {
+MONGODB_SETTINGS = {
 	"host": "127.0.0.1",
 	"port": "27017",
 }
 
-sqlserver_settings = {
+SQLSERVER_SETTINGS = {
 	"host": "crowd-db.chinacloudapp.cn",
 	"port": "1433",
 	"user": "crowd-user",
 	"password": "zaixian2013",
 	"database": "CrowdDB",
 	"charset": "UTF-8",
-	"reconnect_cnt": 3,	# limited times to reconnect
+	"reconnect_times": 3,	# limited times to reconnect
 	"reconnect_interval": 100,
 }
 
@@ -37,13 +46,25 @@ sqlserver_settings = {
 #sqlserver_database = "CrowdDB"
 #sqlserver_charset = "UTF-8"
 
-logging.config.fileConfig('conf/logging.conf')
+DECRYPT_SETTINGS = {
+	"key_path": os.path.join(TOOLS_DIR, 'key'),
+	"timeout": 60,
+
+}
+
+logging.config.fileConfig(LOGGING_CONF_FILE)
 logger = logging.getLogger('root')
 
-download_settings = {
+DOWNLOAD_SETTINGS = {
 	"queue_buffer": 2500,
 	"queue_timeout": 60,
 	"download_timeout": 60,
+}
+
+# tools are assumed to be put at the dir named tools
+TOOLS_SETTINGS = {
+	"tuncating_pl": "run_bat.pl",
+
 }
 
 from settings_local import *

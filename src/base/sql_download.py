@@ -4,16 +4,16 @@ from core import database, download
 
 
 class SQLDownloader(base.BaseAutomaton):
-	""" """
-	def __init__(self, filename):
+	"""an automaton to download files according to sql quried in databases"""
+	def __init__(self, filename, root_dir):
 		super(SQLDownloader, self).__init__()
 		self.sql = """SELECT top 10 da.Title, da.FileName, pip.PersonId FROM DataAcquisition da, PersonInProject pip
 			WHERE pip.ProjectId = {0} AND pip.Code in ({1})
 			AND da.ProjectId = pip.ProjectId AND da.UserGuid = pip.ProviderUserGuid"""
 		self.code_cnt = 10
-		self.filename = filename
 		self.crawler_num = 8
-		self.root_dir = '../data/xianhua'
+		self.filename = filename
+		self.root_dir = root_dir
 
 	def set_filename(filename):
 		self.filename = filename

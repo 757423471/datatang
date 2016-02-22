@@ -4,63 +4,25 @@ import sys
 import urllib2
 import threading
 import Queue
+
+from core.workstation import WorkStation
 from settings import logger
-from settings import download_settings as ds
+from settings import DOWNLOAD_SETTINGS as ds
 
-class Downloader(object):
-	"""A controller to download multiple files"""
-	def __init__(self, crawler_num):
-		super(Downloader, self).__init__()
-		self.crawler_num = crawler_num
-		self.src_queue = Queue.Queue(ds['queue_buffer'])
-		self.src_queue.join()
 		
-	def queueing(self, links):
+class Crawler(WorkStation):
+	"""Crawlers to download resource"""
+	def __init__(self, src_queue, dst_queue):
+		super(Crawler, self).__init__(src_queue, dst_queue)
+
+	def process(self, raw_data):
+		url, name = raw_data
 		try:
-			for link in links:
-				self.src_queue.put(link, block=True, timeout=ds['queue_timeout'])
-			self.src_queue.join()
-		except Queue.Full, e:
-			logger.info("download queue was blocked")
-			return
+			response = urllib2.urlopen(url, timeout=ds.get('download_timeout', 120))
+			data = response.read()
 
-	def dispatch(self):
-		if Crawler.count < self.crawler_num:
-			for i in range(Crawler.count, self.crawler_num):
-				c = Crawler(self.src_queue)
-				c.setDaemon(True)
-				c.start()
-
-
-
-class Crawler(threading.Thread):
-	"""crawlers to download files in multiple threads"""
-	count = 0
-
-	def __init__(self, src_queue):
-		super(Crawler, self).__init__()
-		self.src_queue = src_queue
-		Crawler.count += 1
-		self.name = "crawler" + str(Crawler.count)
-		logger.info('crawler %s is initialized' % self.name)
-
-	def __del__(self):
-		logger.info('crawler %s is destroyed' % self.name)
-		Crawler.count -= 1
-
-	def run(self):
-		while True:
-			(filename, url) = self.src_queue.get()
-
-			try:
-				response = urllib2.urlopen(url, timeout=ds['download_timeout'])
-				with open(filename, 'wb') as fp:
-					fp.write(response.read())
-				self.src_queue.task_done()
-			except (HTTPError, URLError) as e:
-				logger.error('internet error: %s %s' % (e.code, url))
-			except IOError, e:
-				logger.error('unable to write to %s' % e.filename)
-
-
-		
+			return (data, name)
+		except urllib2.HTTPError, e:
+			logger.error('falied to connect to %s, may for %s' % (url, e.reason))
+		except urllib2.URLError, e:
+			logger.error('unable to open url %s for %s' % (url, e.reason))
