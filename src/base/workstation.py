@@ -13,8 +13,20 @@ class WorkStation(threading.Thread):
 
 	# method to initialize static variables
 	@classmethod
-	def setup(cls, *args, **kwargs):
+	def set_up(cls, *args, **kwargs):
 		pass
+
+	@classmethod
+	def tear_down(cls, *args, **kwargs):
+		pass	
+
+	# different from set_up and tear_down, initialize and destroy is able to operate instance
+	# therefore, which should be called after instantiation
+	# def initialize(self):
+	# 	pass
+
+	# def destroy(self):
+	# 	pass
 
 	def mapping(self, cell):
 		return cell

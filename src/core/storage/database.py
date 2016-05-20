@@ -1,6 +1,5 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
-# db_handler.py - provides uniform interfaces to query or modify the database
+# database.py - provides uniform interfaces to query or modify the database
 # authors: Liu Size, Xiao Yang<xiaoyang0117@gmail.com>
 # date: 2016.01.28
 
@@ -33,11 +32,11 @@ class SQLServerHandler(object):
 			try:
 				conn = pymssql.connect(host=ss.get('host'), port=ss.get('port'), user=ss.get('user'),\
 					password=ss.get('password'), database=ss.get('database'), charset=ss.get('charset'))
-				logger.info("connected")
+				logger.info("connected to sqlserver")
 				return conn
-			except Exception, e:	# add a specified exception
+			except Exception, e:	# TODO:add a specified exception
 				conn_cnt += 1
-				logger.debug('connecting failed, times to reconnect: %d' % conn_cnt)
+				logger.info('connecting failed, times to reconnect: %d' % conn_cnt)
 		
 		logger.warning('unable to establish a connection, waiting for the next time')
 		return None
@@ -96,7 +95,7 @@ class SQLServerHandler(object):
 		try:
 			logger.info('executes sql: %s' % sql_commit)
 			self.cursor.execute(sql_commit)
-			self.cursor.commit()
+			self.conn.commit()
 		except Exception as e:
 			logger.error(e)
 			return 
@@ -107,3 +106,6 @@ class SQLServerHandler(object):
 	#self.cursor.executemany() 
 	def exec_many(self, sql, arg):
 		raise NotImplementedError
+
+	def retrieve(self, *args, **kwargs):
+		pass

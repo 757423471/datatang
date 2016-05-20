@@ -1,7 +1,7 @@
 import unittest
 import Queue
 
-from core.workstation import WorkStation
+from base.workstation import WorkStation
 
 class WorkStationTestCase(unittest.TestCase):
 	def setUp(self, cls):

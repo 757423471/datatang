@@ -36,7 +36,7 @@ SQLSERVER_SETTINGS = {
 	"database": "CrowdDB",
 	"charset": "UTF-8",
 	"reconnect_times": 3,	# limited times to reconnect
-	"reconnect_interval": 100,
+	"reconnect_interval": 300,
 }
 
 #sqlserver_ip = "113.31.17.46"
@@ -45,6 +45,25 @@ SQLSERVER_SETTINGS = {
 #sqlserver_password = "zaixian2013"
 #sqlserver_database = "CrowdDB"
 #sqlserver_charset = "UTF-8"
+
+SMB_SETTINGS = {
+	"host": "10.10.8.123",
+	"port": 139, # 139 if using NetBIOS over tcp/ip, 445 if direct hosting over tcp/ip
+	"username": "administrator",
+	"password": "Simple1921",
+	"domain": "",	# workgroup, it is safe to leave it empty
+	"client_name": "DATATANG",	# an arbitary ASCII string	
+	"server_name": "WIN-DJM4V2HB0T5",
+	# NTLMv1 or NTLMv2 authentication will be used, guess to be True for WIN7, Vista
+	"use_ntlm_v2": True,
+
+	"reconnect_times": 3,
+	"connect_timeout": 60,
+	"echo_timeout": 30,
+	"retrive_timeout": 120,
+	"reconnect_interval": 300,
+}
+
 
 DECRYPT_SETTINGS = {
 	"key_path": os.path.join(TOOLS_DIR, 'key'),

@@ -28,7 +28,7 @@ class SQLDownloader(base.BaseAutomaton):
 				else:
 					data[project_id].append(line.replace('\n', ''))
 		for key, vals in data.items():
-			i = 0
+			i = 0	
 			while i < len(vals):
 				yield (key, ', '.join(vals[i:i+self.code_cnt]))
 				i += self.code_cnt
