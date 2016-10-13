@@ -24,27 +24,22 @@ AZURE_SETTINGS = {
 }
 
 MONGODB_SETTINGS = {
-	"host": "127.0.0.1",
-	"port": "27017",
+	"host": "crowdser.chinacloudapp.cn",
+	"port": "37011",
+	"user": "crowdadmin",
+	"password": "2015_zaixianSimple",
 }
 
 SQLSERVER_SETTINGS = {
-	"host": "crowd-db.chinacloudapp.cn",
-	"port": "1433",
-	"user": "crowd-user",
-	"password": "zaixian2013",
+	"host": "crowdser.chinacloudapp.cn",
+	"port": "9280",
+	"user": "sa",
+	"password": "2015_zaixianSimple",
 	"database": "CrowdDB",
 	"charset": "UTF-8",
 	"reconnect_times": 3,	# limited times to reconnect
 	"reconnect_interval": 300,
 }
-
-#sqlserver_ip = "113.31.17.46"
-#sqlserver_port = "1433"
-#sqlserver_user = "sa"
-#sqlserver_password = "zaixian2013"
-#sqlserver_database = "CrowdDB"
-#sqlserver_charset = "UTF-8"
 
 SMB_SETTINGS = {
 	"host": "10.10.8.123",

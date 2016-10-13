@@ -7,7 +7,10 @@ import sys
 import time
 import random
 import pymssql
+from pymongo import MongoClient, errors
+from core.exceptions import ArgumentsError, ConnectionError
 from settings import SQLSERVER_SETTINGS as ss
+from settings import MONGODB_SETTINGS as ms
 from settings import logger
 
 MAX_INTERVAL = 500
@@ -109,3 +112,70 @@ class SQLServerHandler(object):
 
 	def retrieve(self, *args, **kwargs):
 		pass
+
+
+class MongoDBHandler(object):
+	def __init__(self):
+		super(MongoDBHandler, self).__init__()
+		self.client = self.__connect()
+
+	def __del__(self):
+		try:
+			self.client.close()
+		except AttributeError,e:
+			pass
+
+	def __connect(self):
+		mongo_url = self.__get_mongo_url(ms['user'], ms['password'], ms['host'], ms['port'])
+		logger.info("connectting to {0}".format(mongo_url))
+		client = MongoClient(mongo_url)
+		try:
+			client.address
+		except errors.ServerSelectionTimeoutError as e:
+			logger.error("timed out to connect {0}".format(mongo_url))
+			raise exceptions.ConnectionError("connecting timeout")
+		else:
+			logger.info("connected")
+			return client
+
+	def __get_mongo_url(self, user, password, host, port):
+		if user and password and host and port:
+			return "mongodb://{user}:{password}@{host}:{port}".format(**locals())
+		else:
+			logger.error("infomation is not complete, unable to return a valid mongo url")
+			raise ArgumentsError(user=user, password=password, host=host, port=port)
+
+	def set_database(self, db_name):
+		self.db_name = db_name
+		self.db = self.client[db_name]
+		
+
+	def fetch(self, table, cond):
+		try:
+			for item in getattr(self.db, table).find(cond):
+				yield item
+		except errors.ServerSelectionTimeoutError as e:
+			logger.error("timed out to fetch {0}".format(table))
+			raise exceptions.ConnectionError("connecting timeout")
+
+	def fetch_source(self, cond={}):
+		try:
+			for item in self.db.Source.find(cond):
+				yield item
+		except errors.ServerSelectionTimeoutError as e:
+			logger.error("timed out to fetch {0}".format(table))
+			raise exceptions.ConnectionError("connecting timeout")
+
+	def fetch_result(self, cond={}):
+		try:
+			for item in self.db.Result.find(cond):
+				yield item
+		except errors.ServerSelectionTimeoutError as e:
+			logger.error("timed out to fetch {0}".format(table))
+			raise exceptions.ConnectionError("connecting timeout")
+
+	def close(self):
+		self.client.close()
+			
+
+

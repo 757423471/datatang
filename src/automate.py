@@ -2,8 +2,6 @@ import os
 import sys
 import importlib
 
-from base.sql_download import SQLDownloader
-
 try:
 	import settings
 except ImportError, e:
@@ -20,8 +18,13 @@ def execute_newest():
 	for mod in modules:
 		if mod.endswith('.py'):
 			mod = mod.split('.')[0]
-			app = importlib.import_module(mod)
-			app.main()
+			app = importlib.import_module("apps." + mod)
+			try:
+				print("executing {0}".format(app.__name__))
+				app.main()
+			except AttributeError as e:
+				print("cancelled")
+				pass
 
 def temp():
 	s = SQLDownloader('../data/xianhua.txt', '../data/xianhua')
@@ -29,4 +32,4 @@ def temp():
 
 
 if __name__ == '__main__':
-	temp()
+	execute_newest()
