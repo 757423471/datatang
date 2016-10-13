@@ -1,0 +1,11 @@
+[node1]
+user=yang
+ip=111.202.201.177
+password=shujutang
+os=ubuntu 64bit
+
+[node2]
+user=yang
+ip=192.168.4.248
+password=shujutang
+os=ubuntu 32bit
