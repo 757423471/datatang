@@ -30,7 +30,7 @@ class SQLServerHandler(object):
 	# not guaranteed, try to connect in 3 times
 	def __connect(self):
 		conn_cnt = 0
-		logger.info('trying to connect to sqlserver on %s:%s' % (ss.get('host'), ss.get('port')))
+		logger.info('trying to connect to sqlserver hosted on %s:%s' % (ss.get('host'), ss.get('port')))
 		while conn_cnt < ss.get('reconnect_times', 3):
 			try:
 				conn = pymssql.connect(host=ss.get('host'), port=ss.get('port'), user=ss.get('user'),\

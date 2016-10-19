@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
+
+from utils.stocking import fetch_annos
+from settings import logger
 
 # clean the result got from database, only leave necessary fields
-# a bug in wensite leads 1936*1456 => 752*448
+# a bug now in website leads 1936*1456 => 752*448
 def refine(db_result):
 
 	def annotated_label_region(labels):
 		for label, annotations in labels.items():
 			if len(annotations) == 1:
 				anno = annotations[0]
-				return label, (anno['x1']*2.57, anno['y1']*3.25, anno['x2']*2.57, anno['y2']*3.25)
+				#return label, (anno['x1']*2.57, anno['y1']*3.25, anno['x2']*2.57, anno['y2']*3.25)
+				return label, (anno['x1'], anno['y1'], anno['x2'], anno['y2'])
 			elif len(annotations) == 0:
 				pass
 			else:
-				print('more than 1 markers was annotated for {0}'.format(label))	
+				logger.error('more than 1 markers was annotated for {0}'.format(label))	
 				return
 
 	clean_result = {}
@@ -27,7 +32,7 @@ def refine(db_result):
 				frame = frame.replace('.jpg', '.png')
 				images[frame] = {}
 			else:
-				print("filename {0} is invalid".format(img['fileName']))
+				logger.error("filename {0} is invalid".format(img['fileName']))
 
 
 			label, region = annotated_label_region(img['label'])
@@ -40,8 +45,8 @@ def refine(db_result):
 # interface, 
 def process(root_path, results):
 	for label_dir in os.listdir(root_path):
-		if not label_dir.endswith('OOO'):		# FILTER: used when last processing failed
-			continue
+		# if not label_dir.endswith('OOO'):		# FILTER: used when last processing failed
+		# 	continue
 		full_label_dir = os.path.join(root_path, label_dir)
 		if not os.path.isdir(full_label_dir):
 			continue
@@ -49,9 +54,9 @@ def process(root_path, results):
 			current_dir = os.path.join(full_label_dir, title)
 			if not os.path.isdir(current_dir):
 				continue
-			frame_num = int(title.split('_')[-1])		# FILTER
-			if frame_num < 17226:
-				continue
+			# frame_num = int(title.split('_')[-1])		# FILTER
+			# if frame_num < 17226:
+			# 	continue
 			anno = results.get(title)
 			generate_anno_text(current_dir, anno)
 			crop_all_imgs(current_dir, anno)
@@ -59,7 +64,11 @@ def process(root_path, results):
 # crops images in the path as region described in anno
 def crop_all_imgs(path, anno):
 	title = os.path.basename(path)
-	cropped_path = os.path.join(path, title+'_cropped')
+	# cropped_path = os.path.join(path, title+'_cropped')
+	cropped_path = os.path.join(path, 'cropped')
+	# new_name =  os.path.join(path, 'cropped')
+	# shutil.move(cropped_path, new_name)
+
 	images = filter(lambda x: x.endswith('.png'), os.listdir(path))
 	if not os.path.exists(cropped_path):
 		os.makedirs(cropped_path)
@@ -75,14 +84,15 @@ def crop_all_imgs(path, anno):
 			crop(img_name, dst_name, region)
 		except Exception as e:
 			region_str = ','.join(map(lambda x: str(int((x))), region))
-			print('error occured when cropping {0} with region {1}'.format(img_name, region_str))
+			logger.error('error occured when cropping {0} with region {1}'.format(img_name, region_str))
 
 
 # generates the annotation text to indicate regions and labels
 def generate_anno_text(path, anno):
 	display_anno = []
 	for frame, info in anno.items():
-		anno_info = [frame, ','.join(map(lambda x: str(int((x))), info['region'])), info['label']]
+		# anno_info = [frame, ','.join(map(lambda x: str(int((x))), info['region'])), info['label']]
+		anno_info = [frame, ','.join(map(lambda x: str(int((x))), info['region']))]
 		display_anno.append(anno_info)
 	display_anno = sorted(display_anno, key=lambda x: x[0], reverse=False)
 
@@ -92,3 +102,10 @@ def generate_anno_text(path, anno):
 		for i, line in enumerate(display_anno, start=1):
 			line.insert(0, str(i))
 			f.write(' '.join(line) + '\n')
+
+
+def main():
+	db_result = fetch_annos('%693期图片%')
+	refine_result = refine(db_result)
+	process('/Users/imac/Downloads/20160805_g1k17-08-05-2016_15-57-59_idx99', refine_result)
+
