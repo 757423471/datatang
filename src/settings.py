@@ -7,13 +7,24 @@ import os
 import logging
 import logging.config
 
+# dir settings
 # PROJECT_ROOT = os.path.dirname(__file__)
 PROJECT_ROOT = os.getcwd()
 TOOLS_DIR = '%(PROJECT_ROOT)s/../tools' % locals()
 DATA_DIR = '%(PROJECT_ROOT)s/../data' % locals()
-LOGGING_CONF_FILE = '%(PROJECT_ROOT)s/conf/logging.conf' % locals() 
+CONF_DIR = '%(PROJECT_ROOT)s/../conf' % locals()
+
+
+# config settings
+COMMON_CONF_FILE = '%(PROJECT_ROOT)s/conf/common.cfg' % locals() 
+CONF_GEN_SCRIPT_NAME = 'gen_template.py'
+CONF_TEMPLATE_NAME = 'template.cfg'
+CONF_IN_USING_NAME = 'config.cfg'
 
 DAFAULT_TIMEOUT = 60
+
+
+# database settings
 
 AZURE_SETTINGS = {
 	"account": "crowdfile", #容器名
@@ -59,15 +70,11 @@ SMB_SETTINGS = {
 	"reconnect_interval": 300,
 }
 
-
 DECRYPT_SETTINGS = {
 	"key_path": os.path.join(TOOLS_DIR, 'key'),
 	"timeout": 60,
 
 }
-
-logging.config.fileConfig(LOGGING_CONF_FILE)
-logger = logging.getLogger('root')
 
 DOWNLOAD_SETTINGS = {
 	"queue_buffer": 2500,
@@ -81,4 +88,11 @@ TOOLS_SETTINGS = {
 
 }
 
+# logs settings
+LOGGING_CONF_FILE = '%(PROJECT_ROOT)s/conf/logging.conf' % locals() 
+logging.config.fileConfig(LOGGING_CONF_FILE)
+logger = logging.getLogger('root')
+
+
 from settings_local import *
+

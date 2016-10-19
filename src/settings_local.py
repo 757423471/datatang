@@ -17,7 +17,7 @@ mssql_tables = {
 	'data_result': '.dataresult'
 }
 
-data_location = {
-	# 'triplelens': os.path.join(DATA_DIR, 'triplelens'),
-	# 'dynamo':  os.path.join(DATA_DIR, 'dynamo'),
-}
+apps = [
+	'triplelens',
+	'dynamo',
+]
