@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-
+import sys
 from settings import mssql_database, mssql_tables
 from core.storage.database import SQLServerHandler, MongoDBHandler
 
 # look up project id according to its name of batch
 def find_project_id(name):
 	db_handler = SQLServerHandler()
-	result = db_handler.exec_query("select * from {table} where name like '{name}'".format(
+	result = db_handler.exec_query("select * from {table} where name like '%{name}%'".format(
 		table=mssql_database+mssql_tables['project'],
 		name=name)
 		)
@@ -49,6 +49,9 @@ def get_anno_result(project_id):
 # get all (valid) annotation result for a batch name
 def fetch_annos(name, check=True):
 	project_id = find_project_id(name)
+	if not project_id:
+		sys.exit(1)
+
 	project_id = str(project_id) if isinstance(project_id, int) else project_id
 	anno_result = get_anno_result(project_id)
 
