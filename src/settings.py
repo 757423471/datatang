@@ -13,7 +13,7 @@ PROJECT_ROOT = os.getcwd()
 TOOLS_DIR = '%(PROJECT_ROOT)s/../tools' % locals()
 DATA_DIR = '%(PROJECT_ROOT)s/../data' % locals()
 CONF_DIR = '%(PROJECT_ROOT)s/../conf' % locals()
-APPS_DIR = '%(PROJECT_ROOT)s/../apps' % locals()
+APPS_DIR = '%(PROJECT_ROOT)s/apps' % locals()
 
 
 # config settings

@@ -3,6 +3,7 @@ import os
 import shutil
 
 from utils.stocking import fetch_annos
+from utils.parse import parse_config
 from settings import logger
 
 # clean the result got from database, only leave necessary fields
@@ -105,7 +106,13 @@ def generate_anno_text(path, anno):
 
 
 def main():
-	db_result = fetch_annos('%693期图片%')
-	refine_result = refine(db_result)
-	process('/Users/imac/Downloads/20160805_g1k17-08-05-2016_15-57-59_idx99', refine_result)
+	config = parse_config()
+	title = config.get('project', 'title')
+	data = config.get('project', 'data')
 
+	db_result = fetch_annos(title)
+	refine_result = refine(db_result)
+	process(data, refine_result)
+
+if __name__ == '__main__':
+	main()

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import sys
+
 from utils.stocking import fetch_annos
 from utils.dateutil import name_as_datetime
+from utils.parse import parse_config
 from settings import logger, DATA_DIR
+
 
 lens_orientation = {
 	'center': 0,
@@ -101,10 +105,15 @@ def format_output(images, f):
 
 
 def main():
-	db_result = fetch_annos('%698期图片%')
+	config = parse_config()
+	title = config.get('project', 'title')
+
+	db_result = fetch_annos(title)
 	images = refine(db_result)
 	output_filename = name_as_datetime(os.path.join(DATA_DIR,'triplelens'))
 	with open(output_filename, 'w') as f:
 		for image in images:
 			format_output(image, f)
 
+if __name__ == '__main__':
+	main()
