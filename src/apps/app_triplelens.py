@@ -15,7 +15,7 @@ lens_orientation = {
 	'right': 2,
 }
 
-def refine(db_result):
+def refine(db_result, topk=None):
 	images = []
 	for record in db_result:
 		record = record['rdata']
@@ -24,11 +24,11 @@ def refine(db_result):
 		left = extract_annos(record['imagesL'], lens_orientation['left'])
 		right = extract_annos(record['imagesR'], lens_orientation['right'])
 
-		# FILTER: only first 18 frames was annotated for now
-		annoted_frames = sorted(center.keys())[:18]
-		center = subset(center, annoted_frames)
-		left = subset(left, annoted_frames)
-		right = subset(right, annoted_frames)
+		if topk:
+			annoted_frames = sorted(center.keys())[:topk]
+			center = subset(center, annoted_frames)
+			left = subset(left, annoted_frames)
+			right = subset(right, annoted_frames)
 
 		detect_overlapped(center, [left, right])
 		detect_overlapped(left, [center, right])
@@ -77,6 +77,10 @@ def extract_annos(images, image_id):
 			if len(infos):
 				for info in infos:
 					track_name = label+'-'+str(info['num'])
+					# ignores if the value for leave was 1
+					if info['leave'] == 1:
+						logger.info("{0} of {1} in lens-{2} is ignored for the value of leave is 1".format(track_name, frame_id, image_id))
+						continue
 					anno[track_name] = {'track_id': info['num'], 
 										'category': label, 
 										'truncated': info['truncated'],
@@ -89,8 +93,8 @@ def extract_annos(images, image_id):
 
 	return annos
 
-def format_output(images, f):
-	annoted_frames = sorted(images.keys())[:18]
+def format_output(images, f, topk=None):
+	annoted_frames = sorted(images.keys())[:topk]
 
 	for frame_id in annoted_frames:
 		annos = images[frame_id]
@@ -103,17 +107,25 @@ def format_output(images, f):
 				bounding_str=' '.join(track_info['bounding_box']), 
 				**track_info))
 
+def export_raw(db_result):
+	name = os.path.join(DATA_DIR, 'triplelens', title+'_raw.txt')
+	import json
+	with open(name, 'w') as f:
+		json.dump(db_result, f)
+
 
 def main():
 	config = parse_config()
 	title = config.get('project', 'title')
+	try:
+		topk = config.getint('data', 'topk')
+	except ValueError as e:
+		topk = None
 
 	db_result = fetch_annos(title)
-	images = refine(db_result)
+	images = refine(db_result, topk)
 	output_filename = name_as_datetime(os.path.join(DATA_DIR,'triplelens'))
 	with open(output_filename, 'w') as f:
 		for image in images:
-			format_output(image, f)
+			format_output(image, f, topk)
 
-if __name__ == '__main__':
-	main()

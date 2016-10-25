@@ -94,6 +94,8 @@ LOGGING_CONF_FILE = '%(PROJECT_ROOT)s/conf/logging.conf' % locals()
 logging.config.fileConfig(LOGGING_CONF_FILE)
 logger = logging.getLogger('root')
 
+# others
+TERMINAL_EDITOR = "vim"
 
 from settings_local import *
 

@@ -114,5 +114,3 @@ def main():
 	refine_result = refine(db_result)
 	process(data, refine_result)
 
-if __name__ == '__main__':
-	main()

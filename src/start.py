@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import time
 import shutil
 import subprocess
 import importlib
@@ -22,21 +23,31 @@ except ImportError, e:
 	sys.exit(1)
 
 def execute_main(app_names):
-	modules = os.listdir(settings.APPS_DIR)
-	for mod in modules:
-		if mod.endswith('.py') and not mod.startswith('__'):
-			mod = mod.split('.')[0]
-			app_name = mod[4:]	# removes app_***.py
-			if app_name in app_names:
-				app = importlib.import_module("apps."+mod)
-				try:
-					print("executing {0}".format(app.__name__))
-					app.main()
-					print("finished")
-				except AttributeError as e:
-					print("cancelled")
-				# subprocess.check_call(['export PYTHONPATH='+settings.PROJECT_ROOT], shell=True)
-				# subprocess.check_call(['python', os.path.join(settings.APPS_DIR, mod)])
+	modules = list_apps()
+
+	for app_name in app_names:
+		if app_name in modules:
+			app = importlib.import_module("apps.app_"+app_name)
+			try:
+				print("executing {0}".format(app.__name__))
+				app.main()
+				print("finished")
+			except AttributeError as e:
+				print("cancelled")
+			# subprocess.check_call(['export PYTHONPATH='+settings.PROJECT_ROOT], shell=True)
+			# subprocess.check_call(['python', os.path.join(settings.APPS_DIR, mod)])
+
+		else:
+			print("app {0} was not found in apps".format(app_name))
+			print("enter \"list\" to find all apps")
+
+
+def list_apps():
+	files = os.listdir(settings.APPS_DIR)
+	scripts = filter(lambda x: x.endswith('.py') and x.startswith('app_'), files)	# removes non-python-script
+	modules = map(lambda x: x[4:-3], scripts)	# removes 'app_' and '.py'
+	return modules
+
 
 # executing gen_template.py if exists
 # else copy app/template.cnf if exists
@@ -59,7 +70,7 @@ def gen_config(app_names):
 				refresh(new_conf, conf_path, last_conf)
 			else:
 				# TODO: find the newest
-				print("error: too many backup files in {0}, please delete the elders".format(conf_path))
+				print("error: too many invisible files (which starts with .) in {0}, please delete the elders".format(conf_path))
 				sys.exit(1)
 		else:
 			refresh(new_conf, conf_path, last_conf)
@@ -82,10 +93,15 @@ def gen_config(app_names):
 				print("coping common.cfg to {0}".format(app_conf_dir))
 				copy_new_conf(settings.COMMON_CONF_FILE, app_conf_dir)
 
+			if settings.TERMINAL_EDITOR:
+				time.sleep(1)
+				conf_file = os.path.join(app_conf_dir, settings.CONF_IN_USING_NAME)
+				subprocess.check_call([settings.TERMINAL_EDITOR, conf_file])
+
 
 if __name__ == '__main__':
 	app_names = []
-	commands = ["run", "gen_config"]
+	commands = ["run", "gen_config", "list"]
 	me = os.path.basename(sys.argv[0])
 
 	if me == "run":
@@ -103,6 +119,11 @@ if __name__ == '__main__':
 		else:
 			print('please specify apps to config')
 			sys.exit(1)
+
+	elif me == "list":
+		apps = list_apps()
+		print('\n'.join(apps))
+
 	else:
 		print("no such command, please specify command in [{0}]".format(commands))
 
