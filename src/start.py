@@ -53,28 +53,6 @@ def list_apps():
 # else copy app/template.cnf if exists
 # else copy conf/common.cnf 
 def gen_config(app_names):
-	def copy_new_conf(new_conf, conf_path):
-		last_conf = os.path.join(conf_path, settings.CONF_IN_USING_NAME)
-
-		def refresh(new_conf, conf_path, last_conf):
-			shutil.copy(new_conf, last_conf)	# copy the new config
-			bak_conf = name_as_datetime(conf_path, prefix='.', suffix='.cfg')
-			shutil.copy(new_conf, bak_conf)	# back up as datename
-
-		if os.path.exists(last_conf):
-			last_conf_baks = filter(lambda x: x.startswith('.') and x.endswith('cfg'), os.listdir(conf_path))
-			if len(last_conf_baks) == 1:
-				last_conf_bak = last_conf_baks[0]
-				os.remove(os.path.join(conf_path, last_conf_bak))
-				shutil.move(last_conf, os.path.join(conf_path, last_conf_bak[1:]))	# remove dot, then back up
-				refresh(new_conf, conf_path, last_conf)
-			else:
-				# TODO: find the newest
-				print("error: too many invisible files (which starts with .) in {0}, please delete the elders".format(conf_path))
-				sys.exit(1)
-		else:
-			refresh(new_conf, conf_path, last_conf)
-
 	for app in app_names:
 		if app in settings.apps:
 			app_conf_dir = os.path.join(settings.CONF_DIR, app)
@@ -88,15 +66,38 @@ def gen_config(app_names):
 				subprocess.check_call(['python', script, app_conf_dir])
 			elif os.path.exists(template):
 				print("coping template.cfg to {0}".format(app_conf_dir))
-				copy_new_conf(template, app_conf_dir)
+				update_conf(template, app_conf_dir)
 			else:
 				print("coping common.cfg to {0}".format(app_conf_dir))
-				copy_new_conf(settings.COMMON_CONF_FILE, app_conf_dir)
+				update_conf(settings.COMMON_CONF_FILE, app_conf_dir)
 
-			if settings.TERMINAL_EDITOR:
+			if settings.EDITOR:
 				time.sleep(1)
 				conf_file = os.path.join(app_conf_dir, settings.CONF_IN_USING_NAME)
-				subprocess.check_call([settings.TERMINAL_EDITOR, conf_file])
+				subprocess.check_call([settings.EDITOR, conf_file])
+
+# replaces the old config file with the new one, meanwhile creating backup files
+def update_conf(new_conf, conf_path):
+	last_conf = os.path.join(conf_path, settings.CONF_IN_USING_NAME)
+
+	def refresh(new_conf, conf_path, last_conf):
+		shutil.copy(new_conf, last_conf)	# copy the new config
+		bak_conf = name_as_datetime(conf_path, prefix='.', suffix='.cfg')
+		shutil.copy(new_conf, bak_conf)	# back up with name in datename
+
+	if os.path.exists(last_conf):
+		last_conf_baks = filter(lambda x: x.startswith('.') and x.endswith('cfg'), os.listdir(conf_path))
+		if len(last_conf_baks) == 1:
+			last_conf_bak = last_conf_baks[0]
+			os.remove(os.path.join(conf_path, last_conf_bak))
+			shutil.move(last_conf, os.path.join(conf_path, last_conf_bak[1:]))	# remove dot, then back up
+			refresh(new_conf, conf_path, last_conf)
+		else:
+			print("error: too many invisible files (which starts with .) in {0}, please delete the elders".format(conf_path))
+			sys.exit(1)
+	else:
+		refresh(new_conf, conf_path, last_conf)
+
 
 
 if __name__ == '__main__':
@@ -124,6 +125,14 @@ if __name__ == '__main__':
 		apps = list_apps()
 		print('\n'.join(apps))
 
+	# TODO: run apps as cron tasks
+	elif me == "crontab":
+		pass
+
+	# TODO: removes redundant config files and data
+	elif me == "clean":
+		pass
+
 	else:
-		print("no such command, please specify command in [{0}]".format(commands))
+		print("no such command, please specify a command in [{0}]".format(commands))
 
