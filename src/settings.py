@@ -86,7 +86,20 @@ DOWNLOAD_SETTINGS = {
 # tools are assumed to be put at the dir named tools
 TOOLS_SETTINGS = {
 	"tuncating_pl": "run_bat.pl",
+}
 
+# email settings
+MAIL_SETTINGS = {
+	"smtp_server": "mail.shujutang.com",
+	"smtp_port": 25,
+	"smtp_user": None,
+	"smtp_pass": None,
+	"sender": "tech@shujutang.com"
+}
+
+NOTIFY_MAIL_SETTINGS = {
+	"subject": "[automate] {title}",
+	"content": "Task {title} you started before is finised now."
 }
 
 # logs settings
@@ -95,7 +108,7 @@ logging.config.fileConfig(LOGGING_CONF_FILE)
 logger = logging.getLogger('root')
 
 # others
-TERMINAL_EDITOR = "vim"
+EDITOR = "vim"
 
 from settings_local import *
 

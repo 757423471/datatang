@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
-from settings import mssql_database, mssql_tables
+
 from core.storage.database import SQLServerHandler, MongoDBHandler
+from settings import mssql_database, mssql_tables
 
 # look up project id according to its name of batch
 def find_project_id(name):
@@ -46,7 +47,7 @@ def get_anno_result(project_id):
 	mongo_handler.close()
 	return result
 
-# get all (valid) annotation result for a batch name
+# get all (valid) annotation result in according to the batch name
 def fetch_annos(name, check=True):
 	project_id = find_project_id(name)
 	if not project_id:
