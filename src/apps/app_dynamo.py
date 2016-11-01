@@ -2,9 +2,11 @@
 import os
 import shutil
 
+from core.mail import NotifyMailSender
 from utils.stocking import fetch_annos
 from utils.parse import parse_config
 from settings import logger
+
 
 # clean the result got from database, only leave necessary fields
 # a bug now in website leads 1936*1456 => 752*448
@@ -59,8 +61,11 @@ def process(root_path, results):
 			# if frame_num < 17226:
 			# 	continue
 			anno = results.get(title)
-			generate_anno_text(current_dir, anno)
-			crop_all_imgs(current_dir, anno)
+			if anno:
+				generate_anno_text(current_dir, anno)
+				crop_all_imgs(current_dir, anno)
+			else:
+				logger.error("unable to find corresponding annotation for {0}".format(title))
 
 # crops images in the path as region described in anno
 def crop_all_imgs(path, anno):
@@ -108,9 +113,17 @@ def generate_anno_text(path, anno):
 def main():
 	config = parse_config()
 	title = config.get('project', 'title')
-	data = config.get('project', 'data')
+	data = config.get('project', 'data').decode(settings.DEFAULE_DECODING)
+	recipients = config.get('project', 'email')
 
 	db_result = fetch_annos(title)
 	refine_result = refine(db_result)
-	process(data, refine_result)
+	for dirname in os.listdir(data):
+		path = os.path.join(data, dirname)
+		if os.path.isdir(path):
+			process(path, refine_result)
+
+	if recipients:
+		NotifyMailSender(recipients).notify(title)
+
 
