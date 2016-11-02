@@ -5,6 +5,7 @@ import shutil
 from core.mail import NotifyMailSender
 from utils.stocking import fetch_annos
 from utils.parse import parse_config
+from urils.crop import normalize, BoundingBoxError
 from settings import logger
 
 
@@ -12,17 +13,28 @@ from settings import logger
 # a bug now in website leads 1936*1456 => 752*448
 def refine(db_result):
 
-	def annotated_label_region(labels):
+	def annotated_label_region(labels, img_name):
 		for label, annotations in labels.items():
 			if len(annotations) == 1:
 				anno = annotations[0]
 				#return label, (anno['x1']*2.57, anno['y1']*3.25, anno['x2']*2.57, anno['y2']*3.25)
-				return label, (anno['x1'], anno['y1'], anno['x2'], anno['y2'])
+				
+				try:
+					region = normalize(anno['x1'], anno['y1'], anno['x2'], anno['y2'])
+				except BoundingBoxError as e:
+					if e.code == BoundingBoxError.TRIVIAL:
+						region = e.recommend
+						logger.warning("trivial error {1} found for {0}, swapped already".format(img_name, e))
+					else:
+						logger.error("invalid region annotated for {0} - {1}".format(img_name, e))
+						raise ValueError
+
+				return label, region
 			elif len(annotations) == 0:
 				pass
 			else:
 				logger.error('more than 1 markers was annotated for {0}'.format(label))	
-				return
+				raise ValueError
 
 	clean_result = {}
 	for record in db_result:
@@ -32,15 +44,18 @@ def refine(db_result):
 		for img in record['images']:
 			frame = img['fileName'].split("%5C")[-1]
 			if frame.endswith('.jpg') and frame.startswith('frame'):
-				frame = frame.replace('.jpg', '.png')
-				images[frame] = {}
+				frame = frame.replace('.jpg', '.png')	# actually, its raw type is png
 			else:
 				logger.error("filename {0} is invalid".format(img['fileName']))
 
-
-			label, region = annotated_label_region(img['label'])
-			images[frame]['label'] = label
-			images[frame]['region'] = region
+			try:
+				label, region = annotated_label_region(img['label'], img['fileName'])
+			except ValueError as e:
+				continue
+			else:
+				images[frame] = {}
+				images[frame]['label'] = label
+				images[frame]['region'] = region
 
 	return clean_result
 
@@ -70,10 +85,7 @@ def process(root_path, results):
 # crops images in the path as region described in anno
 def crop_all_imgs(path, anno):
 	title = os.path.basename(path)
-	# cropped_path = os.path.join(path, title+'_cropped')
 	cropped_path = os.path.join(path, 'cropped')
-	# new_name =  os.path.join(path, 'cropped')
-	# shutil.move(cropped_path, new_name)
 
 	images = filter(lambda x: x.endswith('.png'), os.listdir(path))
 	if not os.path.exists(cropped_path):
@@ -84,7 +96,7 @@ def crop_all_imgs(path, anno):
 		img_name = os.path.join(path, frame)
 		dst_name = os.path.join(cropped_path, frame)
 		region = anno[frame]['region']
-		# if os.path.exists(dst_name):
+		# if os.path.exists(dst_name):	# only process unfinished 
 		# 	continue
 		try:
 			crop(img_name, dst_name, region)
@@ -97,7 +109,6 @@ def crop_all_imgs(path, anno):
 def generate_anno_text(path, anno):
 	display_anno = []
 	for frame, info in anno.items():
-		# anno_info = [frame, ','.join(map(lambda x: str(int((x))), info['region'])), info['label']]
 		anno_info = [frame, ','.join(map(lambda x: str(int((x))), info['region']))]
 		display_anno.append(anno_info)
 	display_anno = sorted(display_anno, key=lambda x: x[0], reverse=False)
