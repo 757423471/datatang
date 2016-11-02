@@ -13,5 +13,5 @@ apps = [
 	'dynamo',
 ]
 
-DEFAULE_DECODING = "gbk" if os.name == "nt" else "utf-8"
+DEFAULT_DECODING = "utf-8"
 DEFAULT_ENCODING = "utf-8"

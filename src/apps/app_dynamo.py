@@ -5,8 +5,9 @@ import shutil
 from core.mail import NotifyMailSender
 from utils.stocking import fetch_annos
 from utils.parse import parse_config
-from urils.crop import normalize, BoundingBoxError
+from utils.crop import normalize, BoundingBoxError
 from settings import logger
+import settings
 
 
 # clean the result got from database, only leave necessary fields
@@ -20,7 +21,7 @@ def refine(db_result):
 				#return label, (anno['x1']*2.57, anno['y1']*3.25, anno['x2']*2.57, anno['y2']*3.25)
 				
 				try:
-					region = normalize(anno['x1'], anno['y1'], anno['x2'], anno['y2'])
+					region = normalize((anno['x1'], anno['y1'], anno['x2'], anno['y2']))
 				except BoundingBoxError as e:
 					if e.code == BoundingBoxError.TRIVIAL:
 						region = e.recommend
