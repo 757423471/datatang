@@ -2,6 +2,7 @@
 import os
 import re
 import sys
+from copy import deepcopy
 
 from utils.stocking import fetch_annos
 from utils.dateutil import name_as_datetime
@@ -15,7 +16,7 @@ lens_orientation = {
 	'right': 2,
 }
 
-def refine(db_result, topk=None):
+def refine(db_result):
 	images = []
 	for record in db_result:
 		record = record['rdata']
@@ -24,16 +25,16 @@ def refine(db_result, topk=None):
 		left = extract_annos(record['imagesL'], lens_orientation['left'])
 		right = extract_annos(record['imagesR'], lens_orientation['right'])
 
-		if topk:
-			annoted_frames = sorted(center.keys())[:topk]
-			center = subset(center, annoted_frames)
-			left = subset(left, annoted_frames)
-			right = subset(right, annoted_frames)
+		# if topk:
+		# 	annoted_frames = sorted(center.keys())[:topk]
+		# 	center = subset(center, annoted_frames)
+		# 	left = subset(left, annoted_frames)
+		# 	right = subset(right, annoted_frames)
 
 		detect_overlapped(center, [left, right])
 		detect_overlapped(left, [center, right])
 		
-		images.extend([center, left, right])
+		images.append([center, left, right])
 
 	return images
 
@@ -81,7 +82,9 @@ def extract_annos(images, image_id):
 					if info['leave'] == 1:
 						logger.info("{0} of {1} in lens-{2} is ignored for the value of leave is 1".format(track_name, frame_id, image_id))
 						continue
-					anno[track_name] = {'track_id': info['num'], 
+					anno[track_name] = {
+										'frame_id': frame_id,
+										'track_id': info['num'], 
 										'category': label, 
 										'truncated': info['truncated'],
 										'occluded': info['Occluded'],
@@ -89,23 +92,51 @@ def extract_annos(images, image_id):
 										'image_id': image_id,
 										'bounding_box': (str(info['x1']), str(info['y1']), str(info['x2']), str(info['y2'])),
 										}
-
-
 	return annos
 
-def format_output(images, f, topk=None):
-	annoted_frames = sorted(images.keys())[:topk]
+# ordered by frame index then lens orientation
+def cluster_by_frames(image_set, lens_order=("center", "left", "right"), topk=None):
+	frames_set = sorted(reduce(lambda x, y: x.update(y.keys()) or x, image_set, set()))[:topk]
 
-	for frame_id in annoted_frames:
-		annos = images[frame_id]
-		track_names = sorted(annos.keys())
-		for track_name in track_names:
-			track_info = annos[track_name]
-		# for track_name, track_info in annos.items():
-			f.write('{frame_id} {track_id} {category} {truncated} {occluded} {overlapped} {image_id} {bounding_str}\n'.format(
-				frame_id=frame_id, 
-				bounding_str=' '.join(track_info['bounding_box']), 
-				**track_info))
+	track_list = []	# each items containing one annotation
+	for frame_id in frames_set:
+		for lens_orient in lens_order:
+			images = image_set[lens_orientation[lens_orient]]
+			annos = images.get(frame_id)
+			if not annos:
+				continue
+
+			track_names = sorted(annos.keys())
+			for track_name in track_names:
+				track_list.append(annos[track_name])			
+
+	return track_list
+
+
+# ordered by lens orientation then frame index
+def cluster_by_lens(image_set, lens_order=("center", "left", "right"), topk=None):
+	frames_set = sorted(reduce(lambda x, y: x.update(y.keys()) or x, image_set, set()))[:topk]
+
+	track_list = []
+	for lens_orient in lens_order:
+			images = image_set[lens_orientation[lens_orient]]
+			for frame_id in frames_set:
+				annos = images.get(frame_id)
+				if not annos:
+					continue
+			
+				track_names = sorted(annos.keys())
+				for track_name in track_names:
+					track_list.append(annos[track_name])
+	return track_list
+
+
+#center, left, right = image_set
+def format_output(track_list, f):
+	for track_info in track_list:
+		f.write('{frame_id} {track_id} {category} {truncated} {occluded} {overlapped} {image_id} {bounding_str}\n'.format(
+			bounding_str=' '.join(track_info['bounding_box']), 
+			**track_info))
 
 def export_raw(db_result):
 	name = os.path.join(DATA_DIR, 'triplelens', title+'_raw.txt')
@@ -123,9 +154,10 @@ def main():
 		topk = None
 
 	db_result = fetch_annos(title)
-	images = refine(db_result, topk)
+	images = refine(db_result)
 	output_filename = name_as_datetime(os.path.join(DATA_DIR,'triplelens'))
 	with open(output_filename, 'w') as f:
-		for image in images:
-			format_output(image, f, topk)
+		for image_set in images:
+			track_list = cluster_by_frames(image_set, topk=topk)
+			format_output(track_list, f)
 
