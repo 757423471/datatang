@@ -139,3 +139,5 @@ def main():
 		NotifyMailSender(recipients).notify(title)
 
 
+def usage():
+	return "crops photos taken for cars, tail lamps were only ought to be reserved"

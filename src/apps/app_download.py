@@ -20,3 +20,6 @@ def main():
 
 	s = SQLDownloader(conf_file, data_path)
 	s.download()
+
+def usage():
+	return "downloads source files according to project id and code"

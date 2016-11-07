@@ -161,3 +161,5 @@ def main():
 			track_list = cluster_by_frames(image_set, topk=topk)
 			format_output(track_list, f)
 
+def usage():
+	return "exports data annotated for images captured by three lens together"
