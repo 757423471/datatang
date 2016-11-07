@@ -10,7 +10,7 @@ mssql_tables = {
 
 apps = [
 	'triplelens',
-	'dynamo',
+	'taillight',
 ]
 
 DEFAULT_DECODING = "utf-8"
