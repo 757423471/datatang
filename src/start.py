@@ -6,6 +6,7 @@ import time
 import shutil
 import subprocess
 import importlib
+import hashlib
 
 os.chdir('./src')
 from utils.dateutil import name_as_datetime
@@ -110,27 +111,36 @@ def update_conf(new_conf, conf_path):
 
 # removes empty and duplicated files in conf/ and data/ 
 def clean(app_name):
-	to_del = []
 
-	data_path = os.path.join(settings.DATA_DIR, app_name)
-	filelist = map(lambda x: os.path.join(data_path, x), os.listdir(data_path))
-	filestatus = map(lambda x: (x, os.stat(x)), filelist)
+	def find_empty_or_duplicate(root_path):
+		filelist = filter(lambda x: x not in settings.RESERVED_FILES and not x.startswith('.'), os.listdir(root_path))
+		filelist = map(lambda x: (os.path.join(root_path, x), os.stat(os.path.join(root_path, x))), filelist)
+		# sorts files by last modification time
+		sorted_files = sorted(filelist, key=lambda x: x[1].st_mtime, reverse=True)
 
-	def empty_files(filestatus):
-		empty = []
-		for file, status in filestatus:
-			if not status.st_size:
-				empty.append(file)
-		return empty
-
-	# finds all empty files at first
-	to_del.extend(empty_files(filestatus))
-	filestatus = sorted(filter(lambda x: x not in to_del, filestatus), key=lambda x: x[1].st_ctime)
-	import pdb;pdb.set_trace()
-
-
+		hash_vals, to_del = [], []
+		for file, status in sorted_files:
+			if status.st_size:
+				with open(file, 'r') as f:
+					hash_val = hashlib.md5(f.read()).hexdigest()
+				if hash_val not in hash_vals:
+					hash_vals.append(hash_val)
+					continue
+			to_del.append(file)
+		return to_del
 
 
+	redundant_data = find_empty_or_duplicate(os.path.join(settings.DATA_DIR, app_name))
+	redundant_conf = find_empty_or_duplicate(os.path.join(settings.CONF_DIR, app_name))
+
+	def list_then_delete(redundant):
+		print "\n".join(map(lambda x: os.path.relpath(x), redundant))
+		if raw_input("files listed above will be deleted, are you sure?[y/n]").lower() == 'y':
+			for filepath in redundant:
+				os.remove(filepath)
+
+	list_then_delete(redundant_data)
+	list_then_delete(redundant_conf)
 
 
 def crontab(app_name, plan=None):
@@ -144,7 +154,8 @@ if __name__ == '__main__':
 	callee = {
 		"run": (execute_main, "please specify apps to run"),
 		"gen_config": (gen_config, "please specify apps to config"),
-		"clean": (clean, "please specify apps to clean config and data"),
+		"clean": (clean, "please specify apps to be cleaned"),
+
 	}
 
 

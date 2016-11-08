@@ -110,5 +110,13 @@ logger = logging.getLogger('root')
 # others
 EDITOR = "vim"
 
+
+RESERVED_FILES = [
+	'.gitignore', 
+	CONF_GEN_SCRIPT_NAME, 
+	CONF_TEMPLATE_NAME, 
+	CONF_IN_USING_NAME,
+	]
+
 from settings_local import *
 
