@@ -52,12 +52,30 @@ def normalize(region, width=1936, height=1456):
 	else:
 		return (xmin, ymin, xmax, ymax)
 
+# implemented in skimage may be not a good idea
+
+# def crop(img_name, dst_name, region):
+# 	from skimage import io
+# 	img = io.imread(img_name)
+# 	try:
+# 		xmin, ymin, xmax, ymax = normalize(region)
+# 	except BoundingBoxError as e:
+# 		if e.code == BoundingBoxError.SERIOUS or e.code == BoundingBoxError.WARNING:
+# 			logger.error("unable to crop {0} for {1}".format(img_name, e))
+# 			return -1
+# 		if e.code == BoundingBoxError.TRIVIAL:
+# 			logger.warning("found error {1} for {0}, but cropped still".format(img_name, e))
+# 			xmin, ymin, xmax, ymax = e.recommend
+# 	roi = img[ymin:ymax, xmin:xmax]
+# 	io.imsave(dst_name, roi)
+
 
 def crop(img_name, dst_name, region):
-	from skimage import io
-	img = io.imread(img_name)
+	from PIL import Image
+	im = Image.open(img_name)
+
 	try:
-		xmin, ymin, xmax, ymax = normalize(region)
+		xmin, ymin, xmax, ymax = normalize(region, im.width, im.height)
 	except BoundingBoxError as e:
 		if e.code == BoundingBoxError.SERIOUS or e.code == BoundingBoxError.WARNING:
 			logger.error("unable to crop {0} for {1}".format(img_name, e))
@@ -65,8 +83,8 @@ def crop(img_name, dst_name, region):
 		if e.code == BoundingBoxError.TRIVIAL:
 			logger.warning("found error {1} for {0}, but cropped still".format(img_name, e))
 			xmin, ymin, xmax, ymax = e.recommend
-	roi = img[ymin:ymax, xmin:xmax]
-	io.imsave(dst_name, roi)
-
+	
+	region_im = im.crop((xmin, ymin, xmax, ymax))
+	region_im.save(dst_name)
 
 

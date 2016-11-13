@@ -33,7 +33,11 @@ def execute_main(app_name):
 			app.main()
 			print("finished")
 		except AttributeError as e:
-			print("cancelled")
+			if e.message == "'module' object has no attribute 'main'":
+				print("cancelled for not implementing main function")
+			else:
+				raise e
+				
 		# subprocess.check_call(['export PYTHONPATH='+settings.PROJECT_ROOT], shell=True)
 		# subprocess.check_call(['python', os.path.join(settings.APPS_DIR, mod)])
 
@@ -58,6 +62,9 @@ def list_apps():
 			print("{0} - {1}".format(app_name, app.usage()))
 		except AttributeError as e:
 			print("\n")
+
+def install_dep(app_name):
+	pass
 
 
 # executing gen_template.py if exists
@@ -158,7 +165,6 @@ if __name__ == '__main__':
 
 	}
 
-
 	me = os.path.basename(sys.argv[0])
 	
 	if me not in commands:
@@ -184,4 +190,17 @@ if __name__ == '__main__':
 	if me == "crontab":
 		pass
 
+	if me == "utility":
+		pass
 
+	if me == "branch":
+		pass
+
+	if me == "history":
+		pass
+
+	if me == "help":
+		pass
+
+	if me == "install":
+		pass

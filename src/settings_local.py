@@ -11,6 +11,8 @@ mssql_tables = {
 apps = [
 	'triplelens',
 	'taillight',
+	'cards',
+	'extracts',
 ]
 
 DEFAULT_DECODING = "utf-8"
