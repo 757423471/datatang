@@ -76,7 +76,7 @@ class SMBConnProxy(object):
 
 	def retrieve_file(self, shared_device, root_dir, file_obj, timeout=60):
 		if not self.is_connected:
-			logger.warning('connection was reset, reconnecting...')
+			logger.warning('connection to smb was reset, reconnecting...')
 			self.smb_conn = self.connect()
 
 		self.smb_conn.retrieveFile(shared_device, root_dir, file_obj, timeout)

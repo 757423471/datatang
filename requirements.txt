@@ -11,8 +11,6 @@ pycrypto==2.6.1
 pymongo==3.3.0
 pymssql==2.1.2
 pysmb==1.1.17
-scikit-image==0.12.3
-scipy==0.18.1
 six==1.10.0
 toolz==0.8.0
 wheel==0.29.0

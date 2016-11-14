@@ -138,7 +138,7 @@ def format_output(track_list, f):
 			bounding_str=' '.join(track_info['bounding_box']), 
 			**track_info))
 
-def export_raw(db_result):
+def export_raw(db_result, title):
 	name = os.path.join(DATA_DIR, 'triplelens', title+'_raw.txt')
 	import json
 	with open(name, 'w') as f:

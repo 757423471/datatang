@@ -19,7 +19,7 @@ class DataSourceFactory(object):
 			self.storage = database.SQLServerHandler()
 		else:
 			logger.error("unsupported data source: %s " % src)
-			raise NotImplementedError('data source not supported')
+			raise NotImplementedError('data source type not supported')
 		self.queue = queue
 	
 	def retrieve(self, *args, **kwargs):

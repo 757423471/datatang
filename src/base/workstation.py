@@ -44,7 +44,7 @@ class WorkStation(threading.Thread):
 				raw_data = self.mapping(self.src_queue.get(timeout=self.timeout))
 				self.dst_queue.put(self.process(raw_data), timeout=self.timeout)
 				self.src_queue.task_done()
-			except Exception, e:
+			except Exception as e:
 				raise e
 
 	# method to be implemented

@@ -54,9 +54,7 @@ def refine(db_result):
 			except ValueError as e:
 				continue
 			else:
-				images[frame] = {}
-				images[frame]['label'] = label
-				images[frame]['region'] = region
+				images[frame] = {'label': label, 'region': region}
 
 	return clean_result
 

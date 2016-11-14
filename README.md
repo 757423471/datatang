@@ -23,15 +23,18 @@ Automate提供了一系列的命令以方便用户对任务进行快速配置和
 * **gen_config** 生成配置文件模板，默认调用app对应的*gen_template.py*，如果不存在则拷贝对应的*template.cnf*，如果不存在则拷贝*src/conf/common.cnf*;
 * **run** 运行相应app；
 * **clean** 清除对应app内或为空或为冗余的配置文件和输出文件；
+* **history** 执行及生成数据的历史记录及对应关系（TODO）；
+* **install** 脚本依赖安装（TODO）。 
 * **crontab** 设定定时任务（TODO）；
 * **utility** 常用工具的命令行式调用（TODO）；
-* **branch** app版本管理，便于对不稳定的需求变更进行版本管理（TODO）。
-
+* **branch** app版本管理，便于对不稳定的需求变更进行版本管理（TODO）；
+ 
 ## Libraries
 除了方便的命令接口，Automate也提供了对通用功能的抽象和封装：
 
 * **core**
 	* **handlers**
+		* *convert* 音频，图片格式转换；
 		* *decrypt* 加密解密功能；
 		* *download* http或ftp方式获取数据；
 	* **storage**
@@ -46,3 +49,7 @@ Automate提供了一系列的命令以方便用户对任务进行快速配置和
 	* *traverse* 文件遍历；
 	* *crop* 图片剪切；
 	* *match* 关键字匹配。
+
+## TODOs
+
+1. 为每个app生成特定名称的log
