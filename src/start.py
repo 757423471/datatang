@@ -175,12 +175,11 @@ if __name__ == '__main__':
 		"run": (execute_main, "please specify apps to run"),
 		"gen_config": (gen_config, "please specify apps to config"),
 		"clean": (clean, "please specify apps to clean config and data"),
-		#"require":(require,"please specify apps to require")
+		"require":(require_app,"please specify apps to require")
 	}
 
 
 	me = os.path.basename(sys.argv[1])
-	print me
 	
 	if me not in commands:
 		print("no such command, please specify a command in {0}".format(commands))
@@ -189,7 +188,16 @@ if __name__ == '__main__':
 	if me == "list":
 		apps = list_apps()
 
+	elif me == "require":
+		if len(sys.argv)>1:
+			app_names = sys.argv[2:]
+			#env = env_app(app_names)
+			#print app_names
+			require_app(app_names)
+		
+
 	# multi arguments needed
+
 	else:
 		if len(sys.argv) > 1:
 			app_names = sys.argv[1:]
