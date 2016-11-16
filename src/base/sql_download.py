@@ -1,6 +1,7 @@
 import os
 import base
-from core import database, download
+from core.storage import database
+from core.handlers import download
 
 
 class SQLDownloader(base.BaseAutomaton):

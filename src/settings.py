@@ -10,14 +10,16 @@ import logging.config
 # dir settings
 # PROJECT_ROOT = os.path.dirname(__file__)
 PROJECT_ROOT = os.getcwd()
-TOOLS_DIR = '%(PROJECT_ROOT)s/../tools' % locals()
-DATA_DIR = '%(PROJECT_ROOT)s/../data' % locals()
-CONF_DIR = '%(PROJECT_ROOT)s/../conf' % locals()
-APPS_DIR = '%(PROJECT_ROOT)s/apps' % locals()
+TOOLS_DIR = '%(PROJECT_ROOT)s\\..\\tools' % locals()
+DATA_DIR = '%(PROJECT_ROOT)s\\..\\data' % locals()
+CONF_DIR = '%(PROJECT_ROOT)s\\..\\conf' % locals()
+APPS_DIR = '%(PROJECT_ROOT)s\\apps' % locals()
+REQUIRE_DIR = '%(PROJECT_ROOT)s\\require' % locals()
+ENV_DIR = os.path.dirname(os.getcwd())
 
 
 # config settings
-COMMON_CONF_FILE = '%(PROJECT_ROOT)s/conf/common.cfg' % locals() 
+COMMON_CONF_FILE = '%(PROJECT_ROOT)s\\conf\\common.cfg' % locals() 
 CONF_GEN_SCRIPT_NAME = 'gen_template.py'
 CONF_TEMPLATE_NAME = 'template.cfg'
 CONF_IN_USING_NAME = 'config.cfg'

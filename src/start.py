@@ -6,8 +6,11 @@ import time
 import shutil
 import subprocess
 import importlib
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
-os.chdir('./src')
+#os.chdir('\\src')
+from subprocess import Popen,PIPE
 from utils.dateutil import name_as_datetime
 
 try:
@@ -108,6 +111,33 @@ def update_conf(new_conf, conf_path):
 	else:
 		refresh(new_conf, conf_path, last_conf)
 
+
+def require_app(app_names):
+	for app in app_names:
+
+	    if app in settings.apps:
+	    	env_dir = os.path.join(settings.ENV_DIR,'env', app)
+	    	#print env_dir
+	    	
+	    	if not os.path.exists(env_dir):
+	    		env = subprocess.check_call('virtualenv' + ' ' + app, cwd=os.path.dirname(env_dir))
+
+	    	script = os.path.join(env_dir,'Scripts')
+	    	#print script
+	    	#activate = subprocess.check_call('activate',cwd=script)
+	    	#print activate
+	    	app_conf_dir = os.path.join(settings.REQUIRE_DIR,app + '.req')
+	    	print app_conf_dir
+	    	configname = open(app_conf_dir,'r')
+
+	    	old_env = os.environ.copy()
+	    	old_env['PATH'] = script + old_env['PATH']
+	    	for module in configname:
+	    		#install = subprocess.check_call('pip install' + ' -r ' + app_conf_dir, env=old_env, cwd=script)
+	    		# activate = subprocess.check_call('activate.bat',cwd=script)
+	    		install = subprocess.check_call('pip install' + ' ' + module, env=old_env, cwd=script)
+
+
 # removes empty and duplicated files in conf/ and data/ 
 def clean(app_name):
 	to_del = []
@@ -139,16 +169,18 @@ def crontab(app_name, plan=None):
 
 if __name__ == '__main__':
 	app_names = []
-	commands = ["run", "gen_config", "list", "clean"]
+	commands = ["run", "gen_config", "list", "clean","require"]
 
 	callee = {
 		"run": (execute_main, "please specify apps to run"),
 		"gen_config": (gen_config, "please specify apps to config"),
 		"clean": (clean, "please specify apps to clean config and data"),
+		#"require":(require,"please specify apps to require")
 	}
 
 
-	me = os.path.basename(sys.argv[0])
+	me = os.path.basename(sys.argv[1])
+	print me
 	
 	if me not in commands:
 		print("no such command, please specify a command in {0}".format(commands))
@@ -172,5 +204,6 @@ if __name__ == '__main__':
 	# TODO: run apps as cron tasks
 	if me == "crontab":
 		pass
+
 
 
