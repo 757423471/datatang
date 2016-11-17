@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 # import mock
-from common.finder.match import TreeMatcher
+from common.finder.literal import TreeMatcher
 
 class TreeMatcherTestCase(unittest.TestCase):
 	def setUp(self):

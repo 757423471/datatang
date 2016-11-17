@@ -60,7 +60,7 @@ class LexicalAnalyser(object):
 		if not isinstance(lexical_tree, AbstractExpression):
 			raise ValueError("argument lexical_tree was ought to be an instance of AbstractExpression ")
 		for child in lexical_tree.children:
-			
+			pass
 
 
 
