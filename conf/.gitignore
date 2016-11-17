@@ -1,0 +1,10 @@
+./*
+
+triplelens/*
+!triplelens/template.cfg
+termfreq/*
+!termfreq/template.cfg
+taillight/*
+!taillight/template.cfg
+cards/*
+!cards/template.cfg

@@ -62,5 +62,7 @@ target/
 .ipynb_checkpoints
 
 # Porject relative
+.DS_store
+*.bak
 data/
-conf/
+
