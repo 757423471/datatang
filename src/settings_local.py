@@ -13,6 +13,7 @@ apps = [
 	'taillight',
 	'cards',
 	'extracts',
+	'termfreq',
 ]
 
 DEFAULT_DECODING = "utf-8"
