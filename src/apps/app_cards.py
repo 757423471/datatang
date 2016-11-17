@@ -5,10 +5,11 @@ import sys
 import json
 from copy import deepcopy
 
+from core.mail import NotifyMailSender
 from utils.stocking import fetch_annos
 from utils.dateutil import name_as_datetime
 from utils.parse import parse_config
-from utils.crop import crop
+from utils.crop import crop, convert
 from settings import logger, DATA_DIR
 import settings
 
@@ -24,39 +25,46 @@ def import_static(path):
 	return db_result
 
 
-def process(db_result, data_dir, img_dir, anno_dir):
-	index = 0
+def process(db_result, data_dir, img_dir, anno_dir, start, img_format=".png"):
+	index = start - 1
 	for anno in db_result:
 		if anno['effective'] != "1":
-			logger.info("annotation for {0} is noneffective".format(anno['img']))
+			logger.warning("annotation for {0} is noneffective".format(anno['img']))
 			continue
 
 		index += 1
 		src_path = os.path.join(data_dir, anno['img'])
-		logger.info("image {0} => {1}".format(anno['img'], str(index)+'.jpg'))
+		logger.info("image {0} => {1}".format(anno['img'], str(index)+img_format))
 
 		try:
-			img_path = os.path.join(img_dir, str(index)+'.jpg')
+			img_path = os.path.join(img_dir, str(index)+img_format)
 			tailor(anno, src_path, img_path)
 
 			anno_path = os.path.join(anno_dir, str(index)+'.txt')
-			regulate(anno, anno_path)
+			regulate(anno, anno_path, img_format)
 			
 		except ValueError as e:
-			pass
+			index -= 1	# revert
 
 
 def tailor(anno, src_path, dst_path):
 	for box in anno['boxs']:
 		if box["content"] == "Business_card":
 			region = (box['x'], box['y'], box['x']+box['w'], box['y']+box['h'])
-			crop(src_path, dst_path, region)
+			try:
+				crop(src_path, dst_path, region)
+			except IOError as e:
+				logger.error("unresolved path {0}".format(src_path))
+				raise ValueError
 			return
 
-	logger.error("unable to find annotation for business card in {0}".format(anno['img']))
-	raise ValueError
+	# no business card field existed in annotation, just copy the original
+	logger.warning("unable to find field `Business_card` for {0}, copied".format(anno['img']))
+	convert(src_path, dst_path)
 
-def regulate(anno, dst_path):
+
+def regulate(anno, dst_path, img_format):
+	canonical = ()
 	for i, box in enumerate(anno['boxs']):
 		if box["content"] == "Business_card":
 			canonical = (box['x'], box['y'])
@@ -64,14 +72,19 @@ def regulate(anno, dst_path):
 			break
 
 	if not canonical:
-		logger.error("unable to find canonical annotation for {0}".format(anno['img']))
-		raise ValueError
+		logger.warning("unable to find canonical annotation for {0}".format(anno['img']))
+		# raise ValueError
+		canonical = (0, 0)
+	else:
+		for box in anno['boxs']:
+			box['x'] -= canonical[0]
+			box['y'] -= canonical[1]
 
-	for box in anno['boxs']:
-		box['x'] -= canonical[0]
-		box['y'] -= canonical[1]
+	anno['img'] = os.path.basename(dst_path).replace('.txt', img_format)
 
-	anno['img'] = os.path.basename(dst_path).replace('txt', 'jpg')
+	del anno['_id']
+	del anno['_createTime']
+	del anno['_personInProjectId']
 
 	with open(dst_path, 'w') as f:
 		f.write(json.dumps(anno, indent=1, ensure_ascii=False).encode('utf-8'))
@@ -83,6 +96,8 @@ def main():
 	data = config.get('project', 'data').decode(settings.DEFAULT_DECODING)
 	img_path = config.get('product', 'image').decode(settings.DEFAULT_DECODING)
 	anno_path = config.get('product', 'anno').decode(settings.DEFAULT_DECODING)
+	start = config.getint('product', 'start')
+	recipients = config.get('project', 'email')
 
 	product_path = os.path.join(DATA_DIR, 'cards', title.decode(settings.DEFAULT_DECODING))
 	img_path = os.path.join(product_path, img_path)
@@ -92,10 +107,10 @@ def main():
 	if not os.path.exists(anno_path):
 		os.makedirs(anno_path)
 	
-	# db_result = fetch_annos(title, check=False)
-	db_result = import_static("/Users/imac/Downloads/769images.txt")
-	process(db_result, data, img_path, anno_path)
-
+	db_result = fetch_annos(title, check=False)
+	process(db_result, data, img_path, anno_path, start, ".png")
+	if recipients:
+		NotifyMailSender(recipients).notify(title)
 
 
 def usage():

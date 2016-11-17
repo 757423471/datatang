@@ -87,4 +87,8 @@ def crop(img_name, dst_name, region):
 	region_im = im.crop((xmin, ymin, xmax, ymax))
 	region_im.save(dst_name)
 
+def convert(img_name, dst_name):
+	from PIL import Image
+	im = Image.open(img_name)
+	im.save(dst_name)
 
