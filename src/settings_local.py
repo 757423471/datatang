@@ -14,6 +14,7 @@ apps = [
 	'cards',
 	'extracts',
 	'termfreq',
+	'xlsxsplit',
 ]
 
 DEFAULT_DECODING = "utf-8"
