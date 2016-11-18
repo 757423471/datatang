@@ -1,5 +1,8 @@
+import os
 import jieba
 from utils.parse import parse_config
+from utils.dateutil import name_as_datetime
+import settings
 
 def term_count(filename):
 	frequency_table = {}
@@ -43,10 +46,12 @@ def sent_rank(filename, freq_table, scaledown):
 
 
 def stat(predict_sent, result_sent, total):
-	tp = 0	# true positive
+	tp = fp = 0	# true positive and false positive
 	for k in predict_sent.keys():
 		if result_sent.get(k):
 			tp += 1
+		else:
+			fp += 1
 
 	fn = 0 # false negative
 	for k in result_sent.keys():
@@ -54,9 +59,9 @@ def stat(predict_sent, result_sent, total):
 			fn += 1
 
 	print("========================STATISTICS=========================")
-	print("True Positive: {0}\tFalse Positive: {1}".format(tp, len(predict_sent)-tp))
+	print("True Positive: {0}\tFalse Positive: {1}".format(tp, fp))
 	print("False Negative: {0}\tTrue Negative: {1}".format(fn, total-fn))
-	print("Precision: {0}".format(1.0*tp/len(predict_sent)))
+	print("Precision: {0}".format(1.0*tp/(tp + fp)))
 	print("Recall: {0}".format(1.0*tp/(tp + fn)))
 
 
@@ -67,7 +72,8 @@ def predict(source, idf, topk, scaledown):
 	result = { k: v for k, v in topk_sentence }
 	return result
 
-def loads(filename, container={}):
+def loads(filename):
+	container={}
 	with open(filename, 'r') as f:
 		for line in f:
 			container[line.strip()] = 1
@@ -87,9 +93,12 @@ def main():
 	source_tf = term_count(train_source)
 	result_tf = term_count(train_result)
 	idf = inverse_document_freq(source_tf, result_tf)
-
 	stat(predict(test_source, idf, topk, scaledown), loads(test_result), len(loads(test_source)))
-	# export(predict(predict_source, idf, topk, scaledown), 'result.txt')
+	
+	product_dir = os.path.join(settings.DATA_DIR, 'termfreq')
+
+	if config.getboolean('parameters', 'export'):
+		export(predict(predict_source, idf, topk, scaledown), name_as_datetime(product_dir))
 
 
 
