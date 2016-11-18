@@ -8,3 +8,5 @@ taillight/*
 !taillight/template.cfg
 cards/*
 !cards/template.cfg
+xlsxsplit/*
+!xlsxsplit/template.cfg
