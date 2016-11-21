@@ -9,6 +9,7 @@ import importlib
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+
 #os.chdir('\\src')
 from subprocess import Popen,PIPE
 from utils.dateutil import name_as_datetime
@@ -112,30 +113,20 @@ def update_conf(new_conf, conf_path):
 		refresh(new_conf, conf_path, last_conf)
 
 
-def require_app(app_names):
-	for app in app_names:
-
-	    if app in settings.apps:
-	    	env_dir = os.path.join(settings.ENV_DIR,'env', app)
-	    	#print env_dir
-	    	
-	    	if not os.path.exists(env_dir):
-	    		env = subprocess.check_call('virtualenv' + ' ' + app, cwd=os.path.dirname(env_dir))
-
-	    	script = os.path.join(env_dir,'Scripts')
-	    	#print script
-	    	#activate = subprocess.check_call('activate',cwd=script)
-	    	#print activate
-	    	app_conf_dir = os.path.join(settings.REQUIRE_DIR,app + '.req')
-	    	print app_conf_dir
-	    	configname = open(app_conf_dir,'r')
-
-	    	old_env = os.environ.copy()
-	    	old_env['PATH'] = script + old_env['PATH']
-	    	for module in configname:
-	    		#install = subprocess.check_call('pip install' + ' -r ' + app_conf_dir, env=old_env, cwd=script)
-	    		# activate = subprocess.check_call('activate.bat',cwd=script)
-	    		install = subprocess.check_call('pip install' + ' ' + module, env=old_env, cwd=script)
+def require_app(app_name):
+    if app_name in settings.apps:
+    	env_dir = os.path.join(settings.ENV_DIR,'env', app_name)
+    	if not os.path.exists(env_dir):
+    		env = subprocess.check_call('virtualenv' + ' ' + app_name, cwd=os.path.dirname(env_dir))
+    	script = os.path.join(env_dir,'Scripts')
+    	app_conf_dir = os.path.join(settings.REQUIRE_DIR,app_name + '.req')
+    	#configname = open(app_conf_dir,'r')
+    	old_env = os.environ.copy()
+    	old_env['PATH'] = script + old_env['PATH']
+    	#for module in configname:
+        install = subprocess.check_call('pip install' + ' -r ' + app_conf_dir, env=old_env, cwd=script)
+    		# activate = subprocess.check_call('activate.bat',cwd=script)
+    		#install = subprocess.check_call('pip install' + ' ' + module, env=old_env, cwd=script)
 
 
 # removes empty and duplicated files in conf/ and data/ 
@@ -156,7 +147,7 @@ def clean(app_name):
 	# finds all empty files at first
 	to_del.extend(empty_files(filestatus))
 	filestatus = sorted(filter(lambda x: x not in to_del, filestatus), key=lambda x: x[1].st_ctime)
-	import pdb;pdb.set_trace()
+	#\import pdb;pdb.set_trace()
 
 
 
@@ -166,7 +157,9 @@ def clean(app_name):
 def crontab(app_name, plan=None):
 	pass
 
+#import pdb
 
+#pdb.set_trace()
 if __name__ == '__main__':
 	app_names = []
 	commands = ["run", "gen_config", "list", "clean","require"]
@@ -180,7 +173,7 @@ if __name__ == '__main__':
 
 
 	me = os.path.basename(sys.argv[1])
-	
+
 	if me not in commands:
 		print("no such command, please specify a command in {0}".format(commands))
 		sys.exit(1)
@@ -188,19 +181,22 @@ if __name__ == '__main__':
 	if me == "list":
 		apps = list_apps()
 
-	elif me == "require":
-		if len(sys.argv)>1:
-			app_names = sys.argv[2:]
-			#env = env_app(app_names)
-			#print app_names
-			require_app(app_names)
+	#elif me == "require":
+		#if len(sys.argv)>1:
+			#app_names = sys.argv[2:]
+			#require_app(app_names)
+
+	#elif me == "gen_config":
+		#if len(sys.argv)>1:
+			#app_names = sys.argv[2:]
+			#gen_config(app_names)
 		
 
 	# multi arguments needed
 
 	else:
 		if len(sys.argv) > 1:
-			app_names = sys.argv[1:]
+			app_names = sys.argv[2:]
 			for app_name in app_names:
 				callee[me][0](app_name)
 		else:
