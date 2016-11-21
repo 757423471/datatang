@@ -1,7 +1,7 @@
 import os
 import base
-from core import database, download
-
+from core.storage import database
+from core.handlers import download
 
 class SQLDownloader(base.BaseAutomaton):
 	"""an automaton to download files according to sql quried in databases"""
@@ -40,7 +40,7 @@ class SQLDownloader(base.BaseAutomaton):
 			yield map(lambda x: (os.path.join(self.root_dir, x[1].split('/')[-1]), x[1]), result)
 
 	def download(self):
-		self.downloader = download.Downloader(self.crawler_num)
+		self.downloader = download.Crawler(self.crawler_num)
 		self.downloader.dispatch()
 		for urls in self.urls_generator():
 			self.downloader.queueing(urls)
