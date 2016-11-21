@@ -30,12 +30,12 @@ Automate 提供了master, dev, win和unix四个不同的版本，除了master，
     ├ data
     |  └ sayhi
     ├ logs
-    |	 └ sayhi.log
+    |  └ sayhi.log
     └ src
        ├ apps
-    	 |   └ app_sayhi.py
+       |   └ app_sayhi.py
        └ requires
-    		 └ sayhi.req
+    	   └ sayhi.req
 
 如图所示，automate为我们自动创建了conf和data目录下名为sayhi的文件夹，这两个目录分别用来存放app的配置文件和生成文件。其中 `conf/sayhi/template.cfg` 是配置文件的模板，我们会在之后的代码中使用到它。
 `src/apps/app_sayhi.py` 将是我们主要的代码编辑区域，只应包含业务逻辑相关的代码。打开该文件，里面已经提供了如下内容：
@@ -139,6 +139,7 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
 针对编码和调试时经常出现的重复运行 `gen_config` 和 `run` 导致产生冗余的或无意义的配置和输出文件，我们提供了命令 `clean` 去帮助用户清理conf和data文件夹。输入命令
 
     > ./bin/clean sayhi
+    
 会自动找出相应app中多余的配置和输出文件，打印在屏幕上，待用户确认后将其删除掉，使得每份副本只有最新生成的那一份被保留。
 
 
