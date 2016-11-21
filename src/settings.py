@@ -110,7 +110,7 @@ logging.config.fileConfig(LOGGING_CONF_FILE)
 logger = logging.getLogger('root')
 
 # others
-EDITOR = "vim"
+EDITOR = None
 
 from settings_local import *
 
