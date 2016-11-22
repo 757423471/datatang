@@ -10,8 +10,9 @@ Automate是一个数据处理的自动化框架，旨在提供一套快速、灵
 为了方便开发人员在创建app的时候添加新的库和模块，Automate暂时没有将通用模块和用户自定义的代码进行分离。因此在安装的时候，只需要clone代码库即可。
 
 Automate 提供了master, dev, win和unix四个不同的版本，除了master，其他三个分支都是开发者版本:
-	* 分支 `win` 和 `unix` 是分别针对windows和*nix平台的开发者而创建，在使用之前，clone下相应平台的版本，即可直接开发。创建app和提交新的代码时应保证在该平台下操作。
-	* `master` 和 `dev` 版本增加了版本兼容方面的代码，保证程序能在任一平台上部署运行。相较之下，master版本更加稳定，推荐部署时使用，而dev版本则主要是供开发者去合并其他的平台相关的分支并进行相应的兼容性修改。
+
+    * 分支 `win` 和 `unix` 是分别针对windows和*nix平台的开发者而创建，在使用之前，clone下相应平台的版本，即可直接开发。创建app和提交新的代码时应保证在该平台下操作。
+    * `master` 和 `dev` 版本增加了版本兼容方面的代码，保证程序能在任一平台上部署运行。相较之下，master版本更加稳定，推荐部署时使用，而dev版本则主要是供开发者去合并其他的平台相关的分支并进行相应的兼容性修改。
 
 因此，代码提交时应按照如下的准则：
 
@@ -25,8 +26,8 @@ Automate 提供了master, dev, win和unix四个不同的版本，除了master，
 输入该命令后，我们注意到在当前文件夹下出现了一些新的内容:
 
     ├ conf
-    |	 └ sayhi
-    |		 └ template.cfg
+    |  └ sayhi
+    |      └ template.cfg
     ├ data
     |  └ sayhi
     ├ logs
@@ -35,17 +36,15 @@ Automate 提供了master, dev, win和unix四个不同的版本，除了master，
        ├ apps
        |   └ app_sayhi.py
        └ requires
-    	   └ sayhi.req
+           └ sayhi.req
 
 如图所示，automate为我们自动创建了conf和data目录下名为sayhi的文件夹，这两个目录分别用来存放app的配置文件和生成文件。其中 `conf/sayhi/template.cfg` 是配置文件的模板，我们会在之后的代码中使用到它。
 `src/apps/app_sayhi.py` 将是我们主要的代码编辑区域，只应包含业务逻辑相关的代码。打开该文件，里面已经提供了如下内容：
 
     import settings
     from utils.parse import parse_config
-    
     def main():
         config = parse_config()
-    
     def usage():
         return ""
 
@@ -55,16 +54,14 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
     import settings
     from utils.parse import parse_config
     from utils.dateutil import name_as_datetime
-    
     def main():
         config = parse_config()
         name = config.get('data', 'name')
         product_dir = os.path.join(settings.DATA_DIR, 'sayhi')
         if not os.path.exists(product_dir)：
             os.makedirs(product_dir)
-    	  with open(name_as_datetime(product_dir)) as f:
-    	      f.write("Hi, {0}".format(name))
-    
+          with open(name_as_datetime(product_dir)) as f:
+              f.write("Hi, {0}".format(name))
     def usage():
         return "say hi to a friend"
 
@@ -83,9 +80,9 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
 我们注意到 `conf/sayhi` 目录下新增加了如下内容：
 
     └ sayhi
-       ├ .Nov21-0920.cfg		# it could be a differnent name
-    	 ├ config.cfg
-    	 └ template.cfg
+       ├ .Nov21-0920.cfg        # it could be a differnent name
+         ├ config.cfg
+         └ template.cfg
 
 打开 `conf/sayhi/config.cfg` ， 里面的内容和之前在 `template.cfg` 中定义的一模一样，我们将它稍作修改：
 
@@ -114,7 +111,6 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
 我们建议所有的提示性输出都应该通过日志文件系统被记录到日志中以方便定位和回溯。Python提供了一套完整的[日志机制]( [15.7. logging — Logging facility for Python — Python 2.7.12 documentation](https://docs.python.org/2/library/logging.html) )。我们在Automate中隐去了所有细节，每个app的编写者只需要导入 `settings` 模块中的 `logger` 对象，按照如下方式调用即可：
 
     from settings import logger
-    
     logger.DEBUG("debug")
     logger.INFO("info")
     logger.WARNING("warning")
@@ -131,7 +127,7 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
     building virtual environment...
     activating environment...
     installing packages...
-    six==1.10.1 ... 
+    six==1.10.1
     done
 
 
@@ -139,7 +135,6 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
 针对编码和调试时经常出现的重复运行 `gen_config` 和 `run` 导致产生冗余的或无意义的配置和输出文件，我们提供了命令 `clean` 去帮助用户清理conf和data文件夹。输入命令
 
     > ./bin/clean sayhi
-    
 会自动找出相应app中多余的配置和输出文件，打印在屏幕上，待用户确认后将其删除掉，使得每份副本只有最新生成的那一份被保留。
 
 
@@ -153,10 +148,10 @@ Automate将传统的任务按照如下结构组织起来：
 * **logs** 脚本运行产生的对应的日志文件；
 * **tools** 运行时需要的相关工具，通常为二进制或其他语言编写的可执行文件；
 * **src** 代码目录：
-	* **apps** 每一类任务即一个app，也可理解成实现了特定接口的一个（组）脚本；
-	* **settings.py** 通用配置文件，包含框架运行的核心参数配置，不应修改；
-	* **settings_local.py** 本地配置文件，包含本地自定义的参数配置，可覆盖通用配置中的配置项；
-	* **core/*** 数据处理库和模块。
+    * **apps** 每一类任务即一个app，也可理解成实现了特定接口的一个（组）脚本；
+    * **settings.py** 通用配置文件，包含框架运行的核心参数配置，不应修改；
+    * **settings_local.py** 本地配置文件，包含本地自定义的参数配置，可覆盖通用配置中的配置项；
+    * **core/*** 数据处理库和模块。
 
 ### Commands
 Automate提供了一系列的命令以方便用户对任务进行快速配置和管理：
@@ -176,19 +171,18 @@ Automate提供了一系列的命令以方便用户对任务进行快速配置和
 除了方便的命令接口，Automate也提供了对通用功能的抽象和封装：
 
 * **core**
-	* **handlers**
-		* *convert* 音频，图片格式转换；
-		* *decrypt* 加密解密功能；
-		* *download* http或ftp方式获取数据；
-	* **storage**
-		* *database* 提供对sqlserver和MongoDB数据库访问；
-		* *smb_proxy* 提供对ftp的访问；
-	* **common**
-		* *mail* 邮件系统，提供任务完成通知；
-
+    * **handlers**
+        * *convert* 音频，图片格式转换；
+        * *decrypt* 加密解密功能；
+        * *download* http或ftp方式获取数据；
+    * **storage**
+        * *database* 提供对sqlserver和MongoDB数据库访问；
+        * *smb_proxy* 提供对ftp的访问；
+    * **common**
+        * *mail* 邮件系统，提供任务完成通知
 * **utils**
-	* *parse* 配置文件解析；
-	* *stocking* 出库相关的数据库查询操作；
-	* *traverse* 文件遍历；
-	* *crop* 图片剪切；
-	* *match* 关键字匹配。
+    * *parse* 配置文件解析；
+    * *stocking* 出库相关的数据库查询操作；
+    * *traverse* 文件遍历；
+    * *crop* 图片剪切；
+    * *match* 关键字匹配。
