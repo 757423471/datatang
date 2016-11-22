@@ -13,8 +13,10 @@ PROJECT_ROOT = os.getcwd()
 TOOLS_DIR = '%(PROJECT_ROOT)s\\..\\tools' % locals()
 DATA_DIR = '%(PROJECT_ROOT)s\\..\\data' % locals()
 CONF_DIR = '%(PROJECT_ROOT)s\\..\\conf' % locals()
+LOGS_DIR = '%(PROJECT_ROOT)s\\..\\logs' % locals()
 APPS_DIR = '%(PROJECT_ROOT)s\\apps' % locals()
 REQUIRE_DIR = '%(PROJECT_ROOT)s\\require' % locals()
+CORE_DIR = '%(PROJECT_ROOT)s\\core' % locals()
 ENV_DIR = os.path.dirname(os.getcwd())
 
 

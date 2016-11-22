@@ -128,6 +128,35 @@ def require_app(app_name):
     		# activate = subprocess.check_call('activate.bat',cwd=script)
     		#install = subprocess.check_call('pip install' + ' ' + module, env=old_env, cwd=script)
 
+def start_app(app_name):
+	try:
+		if not app_name in settings.apps:
+			conf_dir = os.path.join(settings.CONF_DIR,app_name)
+			os.makedirs(conf_dir)
+			template_dir = os.path.join(conf_dir,settings.CONF_TEMPLATE_NAME)
+			with open(template_dir,'w') as conf:
+				pass
+			data_dir = os.path.join(settings.DATA_DIR,app_name)
+			os.makedirs(data_dir)
+			log_dir = os.path.join(settings.LOGS_DIR,app_name + '.log')
+			with open(log_dir,'w') as logf:
+				pass
+			app_dir = os.path.join(settings.APPS_DIR,'app_' + app_name + '.py')
+			apptemplate = os.path.join(settings.CORE_DIR,'app_template.py')
+			with open(app_dir,'w') as appf:
+				with open(apptemplate,'r') as tem:
+					appf.write(tem.read())
+
+				
+			require_dir = os.path.join(settings.REQUIRE_DIR,app_name + '.req')
+			with open(require_dir,'w') as reqf:
+				pass
+			print "finished"
+	except:
+		print "This app has been in existence"
+
+
+
 
 # removes empty and duplicated files in conf/ and data/ 
 def clean(app_name):
@@ -162,13 +191,14 @@ def crontab(app_name, plan=None):
 #pdb.set_trace()
 if __name__ == '__main__':
 	app_names = []
-	commands = ["run", "gen_config", "list", "clean","require"]
+	commands = ["run", "gen_config", "list", "clean","install","startapp"]
 
 	callee = {
 		"run": (execute_main, "please specify apps to run"),
 		"gen_config": (gen_config, "please specify apps to config"),
 		"clean": (clean, "please specify apps to clean config and data"),
-		"require":(require_app,"please specify apps to require")
+		"install":(require_app,"please specify apps to install"),
+		"startapp":(start_app,"please specify apps to start")
 	}
 
 
