@@ -11,7 +11,6 @@ sys.setdefaultencoding('utf-8')
 
 
 #os.chdir('\\src')
-from subprocess import Popen,PIPE
 from utils.dateutil import name_as_datetime
 
 try:
