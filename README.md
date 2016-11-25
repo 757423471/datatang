@@ -7,7 +7,7 @@ Automate是一个数据处理的自动化框架，旨在提供一套快速、灵
 在这篇教程中，我们将带您快速搭建起Automate框架，创建自己的app并且了解常用的命令和技巧。
 
 ### Develop guide
-为了方便开发人员在创建app的时候添加新的库和模块，Automate暂时没有将通用模块和用户自定义的代码进行分离。因此在安装的时候，只需要clone代码库即可。
+为了方便开发人员在创建app的时候添加新的库和模块，Automate暂时没有将通用模块和用户自定义的代码进行分离。因此在安装的时候，只需要clone代码库并切换到相应的分支即可。
 
 Automate 提供了master, dev, win和unix四个不同的版本，除了master，其他三个分支都是开发者版本:
 
@@ -18,7 +18,11 @@ Automate 提供了master, dev, win和unix四个不同的版本，除了master，
 
     master <———————— dev <———————— win|unix <——————— local commits
 
+
 ### Creating an app
+
+*对于windows下的用户，请先在项目的根目录下创建一个指向 `src/start.py` 下的快捷方式，本教程中将以 `start.lnk` 为该快捷方式的默认名称。*
+
  **app** 是automate中基本的执行单位，相当于一个独立的脚本，所有的操作都是基于它执行。首先，我们在命令行中输入以下命令以创建一个名为 *sayhi* 的app：
 
     > start.lnk startapp sayhi
