@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+from copy import deepcopy
 from common.finder.interpret import LexicalAnalyser
 from common.finder.literal import TreeMatcher
 from common.finder.expression import SequenceExp, AlternationExp, LiteralExp
@@ -44,3 +45,13 @@ class LexicalAnalyserTestCase(unittest.TestCase):
 		self.assertEqual(itp.get_operand_interpreter("^test .*"), factory.RegularExpInterpreter)
 		self.assertEqual(itp.get_operand_interpreter("mail@\w*?\.com"), factory.RegularExpInterpreter)
 		
+	def test_prune(self):
+		expression = u"::( a || b ::) && ::( c || d::)"
+		itp = LexicalAnalyser(self.notation_map)
+		syntax_tree = itp.parse(expression)
+
+		origin = deepcopy(syntax_tree)
+		pruned = itp.prune(syntax_tree)
+		self.assertEqual(origin.eval("test a c"), pruned.eval("test a c"))
+		self.assertEqual(origin.eval("test a b"), pruned.eval("test a b"))
+		self.assertEqual(origin.eval("test a"), pruned.eval("test a"))

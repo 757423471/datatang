@@ -1,4 +1,11 @@
+import copy
 from common.finder.literal import TreeMatcher
+from common.finder.regexp import RegexDirector, MatchBuilder
+
+
+def all_are_instances_of(iterable, cls):
+	return all(map(lambda o: isinstance(o, cls), iterable))
+
 
 class AbstractExpression(object):
 	"""abstract class for expression"""
@@ -29,6 +36,28 @@ class NonterminalExp(AbstractExpression):
 	def eval(self, s):
 		raise NotImplementedError
 
+	# removes the ith old child and appends new ones except for i equals -1
+	def renew(self, i, repl):
+		if i != -1:
+			self.children.pop(i)
+		if isinstance(repl, list):
+			self.children.extend(repl)
+		else:
+			self.children.append(repl)
+
+	def prune(self):
+		children = self.children
+
+		self.children = []
+		for child in children:
+			if not isinstance(child, TerminalExp):
+				child = child.prune()
+			self.renew(-1, child)
+
+	@classmethod
+	def merge(cls, brothers):
+		return brothers
+
 
 class AlternationExp(NonterminalExp):
 	"""node for or"""
@@ -42,21 +71,33 @@ class AlternationExp(NonterminalExp):
 				return True
 		return False
 
-	def replace(self, i, rep):
-		self.children[i] = rep
 
 	def prune(self):
-		for i, child in enumerate(self.children):
-			if not isinstance(child, TerminalExp):
-				self.replace(i, child.prune())
+		super(AlternationExp, self).prune()
 
+		classes = {}
 		for child in self.children:
-			if isinstance(child, self.__class__):
-				self.merge(child)
+			classes.setdefault(child.__class__, []).append(child)
 
+		self.children = []
+		for cls, objects in classes.items():
+			# return it self if only one existed
+			self.renew(-1, cls.merge(objects))
 
-	def merge(self, brother):
-		pass
+		# all the children are the same type
+		if len(self.children) == 1:
+			child = self.children[0]
+			if isinstance(child, AlternationExp) or isinstance(child, TerminalExp):
+				return child
+		else:
+			return self
+
+	@classmethod
+	def merge(cls, brothers):
+		if len(brothers) == 1:
+			return brothers[0]
+		else:
+			return cls(brothers)
 
 
 class SequenceExp(NonterminalExp):
@@ -71,6 +112,18 @@ class SequenceExp(NonterminalExp):
 		return True
 
 
+	def prune(self):
+		super(SequenceExp, self).prune()
+		if all_are_instances_of(self.children, SequenceExp):
+			data = []
+			for child in self.children:
+				data.extend(child.children)
+			self.children = data
+
+		# all the children are the same type
+		return self
+
+
 class NegativeExp(NonterminalExp):
 	"""node for not,  only one child was allowed"""
 
@@ -83,11 +136,12 @@ class NegativeExp(NonterminalExp):
 
 		super(NegativeExp, self).__init__(children)
 
-	def prune(self):
-		self.children[0].prune()
-
 	def eval(self, s):
 		return not self.children[0].eval(s)
+
+	def prune(self):
+		super(NegativeExp, self).prune()
+		return self
 
 
 class PositiveExp(NonterminalExp):
@@ -102,6 +156,10 @@ class PositiveExp(NonterminalExp):
 
 	def eval(self, s):
 		return self.children[0].eval(s)
+
+	def prune(self):
+		super(PositiveExp, self).prune()
+		return self
 
 
 class TerminalExp(AbstractExpression):
@@ -120,6 +178,11 @@ class TerminalExp(AbstractExpression):
 	def eval(self, s):
 		raise NotImplementedError
 
+	@classmethod
+	def merge(cls, exps):
+		data = reduce(lambda x, y: x+y.data, exps, [])
+		return cls(data)
+
 
 class RegularExp(TerminalExp):
 	"""node containing regular expression only"""
@@ -131,12 +194,11 @@ class RegularExp(TerminalExp):
 			if not isinstance(val, str) and not isinstance(val, unicode):
 				raise ValueError("only string and unicode are accepted as arguments")
 		super(RegularExp, self).__init__(data)
-
-	def merge(self, regex):
-		pass
+		director = RegexDirector(MatchBuilder())
+		self.regex_proc = director.construct(data).get_regex_proc()
 
 	def eval(self, s):
-		pass
+		return self.regex_proc.process(s)
 
 
 class LiteralExp(TerminalExp):
@@ -148,11 +210,10 @@ class LiteralExp(TerminalExp):
 		for val in data:
 			if not isinstance(val, str) and not isinstance(val, unicode):
 				raise ValueError("only string and unicode are accepted as arguments")
+		
+		data = list(set(data))
 		super(LiteralExp, self).__init__(data)
 		self.tree_matcher = TreeMatcher(data)
-
-	def merge(self, litexp):
-		pass
 
 	def eval(self, s):
 		return self.tree_matcher.search(s)

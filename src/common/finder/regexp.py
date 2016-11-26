@@ -164,7 +164,7 @@ class MatchBuilder(RegexBuilder):
 			else:
 				raise NotMatchedError("text {0} does not match the pattern".format(text))
 
-		self.regex.parser = match_by_rules
+		self.regex.parse = match_by_rules
 
 	def build_loader(self):
 		self.regex.load = lambda x: x

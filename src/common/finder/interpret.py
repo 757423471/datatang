@@ -59,8 +59,5 @@ class LexicalAnalyser(object):
 	def prune(self, lexical_tree):
 		if not isinstance(lexical_tree, AbstractExpression):
 			raise ValueError("argument lexical_tree was ought to be an instance of AbstractExpression ")
-		for child in lexical_tree.children:
-			pass
-
-
+		return lexical_tree.prune()
 
