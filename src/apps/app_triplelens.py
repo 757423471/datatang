@@ -36,6 +36,7 @@ def refine(db_result):
 		
 		images.append([center, left, right])
 
+	# import pdb;pdb.set_trace()
 	return images
 
 
@@ -58,11 +59,14 @@ def detect_overlapped(primary, minors):
 
 def extract_annos(images, image_id):
 	annos = {}
-	frame_parser = re.compile('.+/image(\d+).jpg')
+	frame_parser = re.compile('.+image(\d+).jpg')
 
 	for image in images:
 		try:
+			# print image['fileName']
 			frame_id = frame_parser.match(image['fileName']).group(1)
+			if int(frame_id) < 0 or int(frame_id) > 99:
+				return annos
 		except AttributeError as e:
 			logger.error('unable to extract frame number of {0}'.format(image['fileName']))
 			continue
@@ -106,6 +110,7 @@ def cluster_by_frames(image_set, lens_order=("center", "left", "right"), topk=No
 			if not annos:
 				continue
 
+			# order by category then index
 			track_names = sorted(annos.keys())
 			for track_name in track_names:
 				track_list.append(annos[track_name])			

@@ -162,24 +162,15 @@ def main():
 		predict_result = predict(test_source, idf, topk, scaledown)
 		stat(predict_result, test_result, test_source)
 
-		rank_distribution(predict_result)
-
-		rank_distribution(predict(test_result, idf, 1, scaledown))
-
-		# real_distribution = rank_distribution(predict_result, test_result)
-		# predict_distribution = rank_distribution(predict_result, predict_result)
-
-		# for r, p in zip(real_distribution, predict_distribution):
-		# 	if p == 0:
-		# 		print 0
-		# 	else:
-		# 		print r*1.0/p
+		# rank_distribution(predict_result)
+		# rank_distribution(predict(test_result, idf, 1, scaledown))
 
 
 	if config.getboolean('predict', 'export'):
 		product_dir = os.path.join(settings.DATA_DIR, 'termfreq')
 		predict_data = collect(predict_root, data)
-		export(predict(predict_data, idf, topk, scaledown), name_as_datetime(product_dir))
+		product = os.path.join(product_dir, "filtered_"+'_'.join(data))
+		export(predict(predict_data, idf, topk, scaledown), product)
 
 
 

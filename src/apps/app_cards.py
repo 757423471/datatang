@@ -4,7 +4,6 @@ import re
 import sys
 import json
 from copy import deepcopy
-
 from core.mail import NotifyMailSender
 from utils.stocking import fetch_annos
 from utils.dateutil import name_as_datetime
@@ -32,9 +31,12 @@ def process(db_result, data_dir, img_dir, anno_dir, start, img_format=".png"):
 			logger.warning("annotation for {0} is noneffective".format(anno['img']))
 			continue
 
+		if not anno.get("boxs"):
+			logger.warning("no field box in annotation for {0}".format(anno['img']))
+			continue
+
 		index += 1
 		src_path = os.path.join(data_dir, anno['img'])
-		logger.info("image {0} => {1}".format(anno['img'], str(index)+img_format))
 
 		try:
 			img_path = os.path.join(img_dir, str(index)+img_format)
@@ -42,6 +44,8 @@ def process(db_result, data_dir, img_dir, anno_dir, start, img_format=".png"):
 
 			anno_path = os.path.join(anno_dir, str(index)+'.txt')
 			regulate(anno, anno_path, img_format)
+
+			logger.info("image {0} => {1}".format(anno['img'], str(index)+img_format))
 			
 		except ValueError as e:
 			index -= 1	# revert
@@ -106,7 +110,7 @@ def main():
 	anno_path = os.path.join(product_path, anno_path)
 	if not os.path.exists(anno_path):
 		os.makedirs(anno_path)
-	
+
 	db_result = fetch_annos(title, check=False)
 	process(db_result, data, img_path, anno_path, start, ".png")
 	if recipients:
