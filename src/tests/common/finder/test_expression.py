@@ -38,7 +38,6 @@ class SequenceExpTestCase(unittest.TestCase):
 		origin = copy.deepcopy(self.seq)
 		pruned = self.seq.prune()
 		self.assertEqual(pruned, self.seq)
-
 		self.assertEqual(origin.eval('test ab'), pruned.eval('test ab'))
 		self.assertEqual(origin.eval('test a'), pruned.eval('test a'))
 
