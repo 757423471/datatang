@@ -64,3 +64,4 @@ target/
 # Porject relative
 data/
 conf/
+*.DS_Store

@@ -33,7 +33,7 @@ def execute_main(app_name):
 		try:
 			print("executing {0}".format(app.__name__))
 			app.main()
-			print("finished")
+			print("done")
 		except AttributeError as e:
 			print("cancelled")
 		# subprocess.check_call(['export PYTHONPATH='+settings.PROJECT_ROOT], shell=True)
@@ -114,16 +114,16 @@ def update_conf(new_conf, conf_path):
 
 def require_app(app_name):
     if app_name in settings.apps:
-    	env_dir = os.path.join(settings.ENV_DIR,'env', app_name)
+    	env_dir = os.path.join(settings.ENV_DIR, app_name)
     	if not os.path.exists(env_dir):
-    		env = subprocess.check_call('virtualenv' + ' ' + app_name, cwd=os.path.dirname(env_dir))
-    	script = os.path.join(env_dir,'Scripts')
-    	app_conf_dir = os.path.join(settings.REQUIRE_DIR,app_name + '.req')
+    		env = subprocess.check_call('virtualenv ' + app_name, cwd=settings.ENV_DIR)
+    	script = os.path.join(env_dir, 'Scripts')
+    	requirement_file = os.path.join(settings.REQUIRE_DIR, app_name + '.req')
     	#configname = open(app_conf_dir,'r')
     	old_env = os.environ.copy()
     	old_env['PATH'] = script + old_env['PATH']
     	#for module in configname:
-        install = subprocess.check_call('pip install' + ' -r ' + app_conf_dir, env=old_env, cwd=script)
+        install = subprocess.check_call('pip install' + ' -r ' + requirement_file, env=old_env, cwd=script)
     		# activate = subprocess.check_call('activate.bat',cwd=script)
     		#install = subprocess.check_call('pip install' + ' ' + module, env=old_env, cwd=script)
 
@@ -150,11 +150,9 @@ def start_app(app_name):
 			require_dir = os.path.join(settings.REQUIRE_DIR,app_name + '.req')
 			with open(require_dir,'w') as reqf:
 				pass
-			print "finished"
-	except:
+			print "done"
+	except OSError:
 		print "This app has been in existence"
-
-
 
 
 # removes empty and duplicated files in conf/ and data/ 
@@ -176,10 +174,6 @@ def clean(app_name):
 	to_del.extend(empty_files(filestatus))
 	filestatus = sorted(filter(lambda x: x not in to_del, filestatus), key=lambda x: x[1].st_ctime)
 	#\import pdb;pdb.set_trace()
-
-
-
-
 
 
 def crontab(app_name, plan=None):

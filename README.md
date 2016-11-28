@@ -18,12 +18,10 @@ Automate 提供了master, dev, win和unix四个不同的版本，除了master，
 
     master <———————— dev <———————— win|unix <——————— local commits
 
-
 ### Creating an app
-
 *对于windows下的用户，请先在项目的根目录下创建一个指向 `src/start.py` 下的快捷方式，本教程中将以 `start.lnk` 为该快捷方式的默认名称。*
 
- **app** 是automate中基本的执行单位，相当于一个独立的脚本，所有的操作都是基于它执行。首先，我们在命令行中输入以下命令以创建一个名为 *sayhi* 的app：
+**app** 是automate中基本的执行单位，相当于一个独立的脚本，所有的操作都是基于它执行。首先，我们在命令行中输入以下命令以创建一个名为 *sayhi* 的app：
 
     > start.lnk startapp sayhi
 
@@ -69,7 +67,15 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
     def usage():
         return "say hi to a friend"
 
-我们的app相当简单，不过对于我们最常见的情景已经足够了。它实现了从配置文件中获取*name*这个参数，并输出到以当前日期时间命名的文件当中去。我们将在下一节中介绍如何编写以及维护配置文件。
+我们的app相当简单，不过对于我们最常见的情景已经足够了。它实现了从配置文件中获取*name*这个参数，并输出到以当前日期时间命名的文件当中去。
+
+在编写完app之后，需要先在 `settings` 中注册我们的app才能开始运行。打开 `settings_local.py` ，在 `apps` 中添加你的app的名称就可以了，以 `sayhi` 为例，输入以下内容：
+
+    apps = [
+        "sayhi",
+        ]
+
+记住，所有app只有注册后才能被执行。我们将在下一节中介绍如何编写以及维护配置文件。
 
 ### Generates configs
 我们已经完成了app的编码，在运行之前，还要编写配置文件以定义输入输出。打开 `conf/sayhi/template.cfg` ，添加如下内容：
@@ -96,16 +102,7 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
 至此，我们的配置文件就已经编写完成。
 
 ### Run
-在上一节中我们完成了对输入输出的定义，只要在 `settings` 中注册我们的app就可以开始运行我们的程序了。打开 `settings_local.py` ，在 `apps` 中添加你的app的名称就可以了，以 `sayhi` 为例，输入以下内容：
-
-```python
-apps = [
-    "sayhi",
-    ]
-
-```
-
-现在，在命令行中输入以下内容：
+在上一节中我们完成了对输入输出的定义，现在，是时候运行我们的app了。在命令行中输入以下内容：
 
     > start.lnk run sayhi
     excuting apps.app_sayhi
@@ -115,12 +112,10 @@ apps = [
 
     > cat data/sayhi/Nov21-0920.txt
     Hi, Mary
-    
 
 一旦一个app稳定下来后，针对每一次任务，我们便可以重复运行上一节(gen_config)与这一节(run)的操作，使得后续的任务变得简单可维护，这也正是Automate的意义所在。
 
-### Coding Specification
-#### Logging
+### Coding Specification#### Logging
 我们建议所有的提示性输出都应该通过日志文件系统被记录到日志中以方便定位和回溯。Python提供了一套完整的[日志机制]( [15.7. logging — Logging facility for Python — Python 2.7.12 documentation](https://docs.python.org/2/library/logging.html) )。我们在Automate中隐去了所有细节，每个app的编写者只需要导入 `settings` 模块中的 `logger` 对象，按照如下方式调用即可：
 
     from settings import logger
@@ -143,16 +138,13 @@ apps = [
     six==1.10.1
     done
 
-
 #### Clean
 针对编码和调试时经常出现的重复运行 `gen_config` 和 `run` 导致产生冗余的或无意义的配置和输出文件，我们提供了命令 `clean` 去帮助用户清理conf和data文件夹。输入命令
 
     > start.lnk clean sayhi
 会自动找出相应app中多余的配置和输出文件，打印在屏幕上，待用户确认后将其删除掉，使得每份副本只有最新生成的那一份被保留。
 
-
-## Basic Concept
-### Hierarchy
+## Basic Concept### Hierarchy
 Automate将传统的任务按照如下结构组织起来：
 
 * **bin** 框架提供的命令文件；

@@ -14,10 +14,10 @@ TOOLS_DIR = '%(PROJECT_ROOT)s\\..\\tools' % locals()
 DATA_DIR = '%(PROJECT_ROOT)s\\..\\data' % locals()
 CONF_DIR = '%(PROJECT_ROOT)s\\..\\conf' % locals()
 LOGS_DIR = '%(PROJECT_ROOT)s\\..\\logs' % locals()
+ENV_DIR = '%(PROJECT_ROOT)s\\..\\.env' % locals()
 APPS_DIR = '%(PROJECT_ROOT)s\\apps' % locals()
 REQUIRE_DIR = '%(PROJECT_ROOT)s\\require' % locals()
 CORE_DIR = '%(PROJECT_ROOT)s\\core' % locals()
-ENV_DIR = os.path.dirname(os.getcwd())
 
 
 # config settings
@@ -107,6 +107,9 @@ NOTIFY_MAIL_SETTINGS = {
 }
 
 # logs settings
+if not os.path.exists(LOGS_DIR):
+	os.makedirs(LOGS_DIR)
+
 LOGGING_CONF_FILE = '%(PROJECT_ROOT)s/conf/logging.conf' % locals() 
 logging.config.fileConfig(LOGGING_CONF_FILE)
 logger = logging.getLogger('root')
