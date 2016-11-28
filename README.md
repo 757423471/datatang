@@ -60,10 +60,10 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
         config = parse_config()
         name = config.get('data', 'name')
         product_dir = os.path.join(settings.DATA_DIR, 'sayhi')
-        if not os.path.exists(product_dir)：
+        if not os.path.exists(product_dir):
             os.makedirs(product_dir)
-          with open(name_as_datetime(product_dir)) as f:
-              f.write("Hi, {0}".format(name))
+        with open(name_as_datetime(product_dir), 'w') as f:
+            f.write("Hi, {0}".format(name))
     def usage():
         return "say hi to a friend"
 
@@ -115,7 +115,9 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
 
 一旦一个app稳定下来后，针对每一次任务，我们便可以重复运行上一节(gen_config)与这一节(run)的操作，使得后续的任务变得简单可维护，这也正是Automate的意义所在。
 
-### Coding Specification#### Logging
+### Coding Specification
+
+#### Logging
 我们建议所有的提示性输出都应该通过日志文件系统被记录到日志中以方便定位和回溯。Python提供了一套完整的[日志机制]( [15.7. logging — Logging facility for Python — Python 2.7.12 documentation](https://docs.python.org/2/library/logging.html) )。我们在Automate中隐去了所有细节，每个app的编写者只需要导入 `settings` 模块中的 `logger` 对象，按照如下方式调用即可：
 
     from settings import logger
@@ -144,7 +146,9 @@ main()函数是app的入口，控制着整个app的流程，我们的代码就�
     > start.lnk clean sayhi
 会自动找出相应app中多余的配置和输出文件，打印在屏幕上，待用户确认后将其删除掉，使得每份副本只有最新生成的那一份被保留。
 
-## Basic Concept### Hierarchy
+## Basic Concept
+
+### Hierarchy
 Automate将传统的任务按照如下结构组织起来：
 
 * **bin** 框架提供的命令文件；
