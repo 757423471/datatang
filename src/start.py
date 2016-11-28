@@ -115,30 +115,29 @@ def update_conf(new_conf, conf_path):
 
 
 def install(app_name):
-    if not app_name in settings.apps:
+	if not app_name in settings.apps:
 		print("app '{0}' is not registered, please make sure it was created before".format(app_name))
-    else:
-    	env_dir = os.path.join(settings.ENV_DIR, app_name)
-    	if not os.path.exists(env_dir):
-    		print("building virtual environment...")
-    		env = subprocess.check_call('virtualenv ' + app_name, cwd=settings.ENV_DIR)
-    	else:
-    		print("virtual environment for {0} was built before".format(app_name))
+	else:
+		env_dir = os.path.join(settings.ENV_DIR, app_name)
+		if not os.path.exists(env_dir):
+			print("building virtual environment...")
+			env = subprocess.check_call('virtualenv ' + app_name, cwd=settings.ENV_DIR)
+		else:
+			print("virtual environment for {0} was built before".format(app_name))
 
-    	print("activating environment...")
-    	vitual_env = os.path.join(env_dir, 'Scripts')
-    	old_env = os.environ.copy()
-    	import pdb;pdb.set_trace()
-    	old_env['PATH'] = vitual_env
+		print("activating environment...")
+		vitual_env = os.path.join(env_dir, 'Scripts')
+		old_env = os.environ.copy()
+		old_env['PATH'] = vitual_env
 
-    	print("installing packages...")
-    	requirement_file = os.path.join(settings.REQS_DIR, app_name+'.req')
-    	with open(requirement_file, 'r') as f:
-    		for requirement in f:
-    			subprocess.check_call('pip install ' + requirement.strip(), shell=True, env=old_env, cwd=vitual_env)
-        # subprocess.check_call('pip install' + ' -r ' + requirement_file, env=old_env, cwd=vitual_env)
-
-        print 'done'
+		print("installing packages...")
+		requirement_file = os.path.join(settings.REQS_DIR, app_name+'.req')
+		with open(requirement_file, 'r') as f:
+			for requirement in f:
+				subprocess.check_call('pip install ' + requirement.strip(), shell=True, env=old_env, cwd=vitual_env)
+		# subprocess.check_call('pip install' + ' -r ' + requirement_file, env=old_env, cwd=vitual_env)
+	
+		print 'done'
 
 def start_app(app_name):
 	if app_name in settings.apps:
@@ -223,14 +222,7 @@ if __name__ == '__main__':
 	if me == "list":
 		apps = list_apps()
 
-	#elif me == "gen_config":
-		#if len(sys.argv)>1:
-			#app_names = sys.argv[2:]
-			#gen_config(app_names)
-		
-
 	# multi arguments needed
-
 	else:
 		if len(sys.argv) > 1:
 			app_names = sys.argv[2:]
@@ -240,11 +232,7 @@ if __name__ == '__main__':
 			print callee[me][1]
 			sys.exit(1)
 
-
-
 	# TODO: run apps as cron tasks
 	if me == "crontab":
 		pass
-
-
 
