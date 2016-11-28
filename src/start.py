@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!C:\Python27
 # -*- coding: utf-8 -*-
 import os
 import sys
@@ -66,7 +66,9 @@ def list_apps():
 # else copy app/template.cnf if exists
 # else copy conf/common.cnf 
 def gen_config(app_name):
-	if app_name in settings.apps:
+	if not app_name in settings.apps:
+		print("app '{0}' is not registered, please make sure it was created before".format(app_name))
+	else:
 		app_conf_dir = os.path.join(settings.CONF_DIR, app_name)
 		if not os.path.exists(app_conf_dir):
 			os.makedirs(app_conf_dir)
@@ -112,47 +114,65 @@ def update_conf(new_conf, conf_path):
 		refresh(new_conf, conf_path, last_conf)
 
 
-def require_app(app_name):
-    if app_name in settings.apps:
+def install(app_name):
+    if not app_name in settings.apps:
+		print("app '{0}' is not registered, please make sure it was created before".format(app_name))
+    else:
     	env_dir = os.path.join(settings.ENV_DIR, app_name)
     	if not os.path.exists(env_dir):
+    		print("building virtual environment...")
     		env = subprocess.check_call('virtualenv ' + app_name, cwd=settings.ENV_DIR)
-    	script = os.path.join(env_dir, 'Scripts')
-    	requirement_file = os.path.join(settings.REQUIRE_DIR, app_name + '.req')
-    	#configname = open(app_conf_dir,'r')
+    	else:
+    		print("virtual environment for {0} was built before".format(app_name))
+
+    	print("activating environment...")
+    	vitual_env = os.path.join(env_dir, 'Scripts')
     	old_env = os.environ.copy()
-    	old_env['PATH'] = script + old_env['PATH']
-    	#for module in configname:
-        install = subprocess.check_call('pip install' + ' -r ' + requirement_file, env=old_env, cwd=script)
-    		# activate = subprocess.check_call('activate.bat',cwd=script)
-    		#install = subprocess.check_call('pip install' + ' ' + module, env=old_env, cwd=script)
+    	import pdb;pdb.set_trace()
+    	old_env['PATH'] = vitual_env
+
+    	print("installing packages...")
+    	requirement_file = os.path.join(settings.REQS_DIR, app_name+'.req')
+    	with open(requirement_file, 'r') as f:
+    		for requirement in f:
+    			subprocess.check_call('pip install ' + requirement.strip(), shell=True, env=old_env, cwd=vitual_env)
+        # subprocess.check_call('pip install' + ' -r ' + requirement_file, env=old_env, cwd=vitual_env)
+
+        print 'done'
 
 def start_app(app_name):
-	try:
-		if not app_name in settings.apps:
-			conf_dir = os.path.join(settings.CONF_DIR,app_name)
-			os.makedirs(conf_dir)
-			template_dir = os.path.join(conf_dir,settings.CONF_TEMPLATE_NAME)
-			with open(template_dir,'w') as conf:
-				pass
-			data_dir = os.path.join(settings.DATA_DIR,app_name)
-			os.makedirs(data_dir)
-			log_dir = os.path.join(settings.LOGS_DIR,app_name + '.log')
-			with open(log_dir,'w') as logf:
-				pass
-			app_dir = os.path.join(settings.APPS_DIR,'app_' + app_name + '.py')
-			apptemplate = os.path.join(settings.CORE_DIR,'app_template.py')
-			with open(app_dir,'w') as appf:
-				with open(apptemplate,'r') as tem:
-					appf.write(tem.read())
+	if app_name in settings.apps:
+		print("app {0} was already registered in the settings, choose another name".format(app_name))
+		sys.exit(0)
+	else:
+		targets_to_create = [
+			(os.path.join(settings.CONF_DIR, app_name), True),	# path, isdir
+			(os.path.join(settings.DATA_DIR, app_name), True),
+			(os.path.join(settings.CONF_DIR, app_name, settings.CONF_TEMPLATE_NAME), False),
+			(os.path.join(settings.LOGS_DIR, app_name+'.log'), False),
+			(os.path.join(settings.REQS_DIR, app_name+'.req'), False),
+			(os.path.join(settings.APPS_DIR,'app_'+app_name+'.py'), False),
+		]
 
-				
-			require_dir = os.path.join(settings.REQUIRE_DIR,app_name + '.req')
-			with open(require_dir,'w') as reqf:
-				pass
-			print "done"
-	except OSError:
-		print "This app has been in existence"
+		for target, isdir in targets_to_create:
+			if os.path.exists(target):
+				print("path {0} is already existed, if you still want to create a new one, delete it firstly".format(target))
+				sys.exit(1)
+
+		for target, isdir in targets_to_create:
+			print("creating {0}".format(os.path.relpath(target)))
+			if isdir:
+				os.makedirs(target)
+			else:
+				with open(target, 'a') as f:
+					pass
+		
+		app_script = os.path.join(settings.APPS_DIR,'app_'+app_name+'.py')
+		with open(app_script, 'w') as f:
+			with open(settings.template_app, 'r') as temp:
+				f.write(temp.read())
+		
+		print("done, please register app '{0}' in settings_local.py".format(app_name))
 
 
 # removes empty and duplicated files in conf/ and data/ 
@@ -173,7 +193,6 @@ def clean(app_name):
 	# finds all empty files at first
 	to_del.extend(empty_files(filestatus))
 	filestatus = sorted(filter(lambda x: x not in to_del, filestatus), key=lambda x: x[1].st_ctime)
-	#\import pdb;pdb.set_trace()
 
 
 def crontab(app_name, plan=None):
@@ -190,8 +209,8 @@ if __name__ == '__main__':
 		"run": (execute_main, "please specify apps to run"),
 		"gen_config": (gen_config, "please specify apps to config"),
 		"clean": (clean, "please specify apps to clean config and data"),
-		"install":(require_app,"please specify apps to install"),
-		"startapp":(start_app,"please specify apps to start")
+		"install":(install, "please specify apps to install"),
+		"startapp":(start_app, "please specify apps to start")
 	}
 
 
@@ -203,11 +222,6 @@ if __name__ == '__main__':
 
 	if me == "list":
 		apps = list_apps()
-
-	#elif me == "require":
-		#if len(sys.argv)>1:
-			#app_names = sys.argv[2:]
-			#require_app(app_names)
 
 	#elif me == "gen_config":
 		#if len(sys.argv)>1:

@@ -16,8 +16,19 @@ CONF_DIR = '%(PROJECT_ROOT)s\\..\\conf' % locals()
 LOGS_DIR = '%(PROJECT_ROOT)s\\..\\logs' % locals()
 ENV_DIR = '%(PROJECT_ROOT)s\\..\\.env' % locals()
 APPS_DIR = '%(PROJECT_ROOT)s\\apps' % locals()
-REQUIRE_DIR = '%(PROJECT_ROOT)s\\require' % locals()
-CORE_DIR = '%(PROJECT_ROOT)s\\core' % locals()
+REQS_DIR = '%(PROJECT_ROOT)s\\requires' % locals()
+
+template_app = '%(PROJECT_ROOT)s\\core\\app_template.py' % locals()
+
+
+if not os.path.exists(REQS_DIR):
+	os.makedirs(REQS_DIR)
+
+if not os.path.exists(ENV_DIR):
+	os.makedirs(ENV_DIR)
+	
+if not os.path.exists(LOGS_DIR):
+	os.makedirs(LOGS_DIR)
 
 
 # config settings
@@ -107,9 +118,6 @@ NOTIFY_MAIL_SETTINGS = {
 }
 
 # logs settings
-if not os.path.exists(LOGS_DIR):
-	os.makedirs(LOGS_DIR)
-
 LOGGING_CONF_FILE = '%(PROJECT_ROOT)s/conf/logging.conf' % locals() 
 logging.config.fileConfig(LOGGING_CONF_FILE)
 logger = logging.getLogger('root')
